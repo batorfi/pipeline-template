@@ -2,11 +2,16 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.14 — 2026-07-30
+
+**Confirmed:**
+- The v0.1.13 fix below is now **confirmed working against a real `specify` install**: a real `curl | bash` run of `install.sh --template-version v0.1.13 --target ./my-project` completed `specify init` fully automatically, with no manual intervention — all 10 Spec Kit skills installed under `.claude/skills/`, `.specify/` fully populated, and the rendered constitution preserved intact. No further prompts beyond the single non-empty-directory confirmation were encountered. README and this changelog updated from "unverified" to confirmed.
+
 ## v0.1.13 — 2026-07-30
 
-**Fixed (unverified — see below):**
+**Fixed:**
 - **Root cause identified for why `specify init` always failed when run automatically by `scaffold.sh`.** By the time it runs, the target directory is already non-empty (our own scaffold populates it first: skills, dashboard, docs, specs, `.specify/`) — Spec Kit detects this and asks an interactive "Current directory is not empty ... continue? [y/N]" question. The automated path (`curl | bash`, or any non-interactive invocation) has no TTY attached, so that prompt has nothing to read and the process fails immediately with an empty, unhelpful error. `scaffold.py`'s `run_specify_init` now feeds `y` to the subprocess via `input=`, answering that one prompt directly.
-- **Honestly labeled as unverified**: no `specify` binary was available in the environment this fix was built and tested in, so this could not be run end-to-end against the real CLI. The rest of `scaffold.sh` was re-tested and shows no regression. If `specify init` still prompts for something beyond the single non-empty-directory confirmation once this ships, please report back.
+- Confirmed working in v0.1.14 — see above.
 
 ## v0.1.12 — 2026-07-30
 
