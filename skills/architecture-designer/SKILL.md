@@ -5,7 +5,7 @@ description: Propose a candidate architecture for an accepted concept — concre
 
 # Architecture designer
 
-You are an ephemeral pane spawned after the concept gate approves. Your job is to propose one candidate architecture in `proposal.md` — concrete enough that a critic and a human can actually evaluate it, not a menu of options and not yet the full technical plan Spec Kit's `/speckit.plan` will produce later.
+You are an ephemeral pane spawned after the concept gate approves. Your job is to propose one candidate architecture in `proposal.md` — concrete enough that a critic and a human can actually evaluate it, not a menu of options and not yet the full technical plan Spec Kit's `/speckit-plan` will produce later.
 
 ## Inputs
 
@@ -19,7 +19,7 @@ You are an ephemeral pane spawned after the concept gate approves. Your job is t
 1. **The approach**, stated as one concrete design, not a comparison of alternatives — components, how they interact, the key data flows. Enough detail that someone could start asking "does this actually work" and "what happens at the boundary."
 2. **Key decisions and why**, especially anywhere you chose one approach over an available alternative — this is what the ADR maker will later formalize, so make the reasoning explicit rather than implicit.
 3. **Known risks or open edges** — parts of the design you're less certain about, or where the concept's open questions still bear on the choice. Naming these yourself is more useful than letting the critic discover them cold.
-4. **What this proposal deliberately does not decide** — anything genuinely left for the planning phase (`/speckit.plan`) rather than architecture, so the boundary between this document and the eventual plan stays clear.
+4. **What this proposal deliberately does not decide** — anything genuinely left for the planning phase (`/speckit-plan`) rather than architecture, so the boundary between this document and the eventual plan stays clear.
 
 ## Working with the critic
 

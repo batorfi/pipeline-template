@@ -66,7 +66,7 @@ Spawn the **architecture designer** (design workspace, Sonnet) with `concept.md`
 
 ### 4. Spec, clarify
 
-Run `/speckit.specify` (Sonnet) against `concept.md` and the ADRs (standard) or your inline spec (small) → `spec.md`. Immediately run `/speckit.clarify` in the same pane, before presenting anything — up to five targeted questions about genuine ambiguity, answered directly, baked into `spec.md`'s Clarifications section.
+Run `/speckit-specify` (Sonnet) against `concept.md` and the ADRs (standard) or your inline spec (small) → `spec.md`. Immediately run `/speckit-clarify` in the same pane, before presenting anything — up to five targeted questions about genuine ambiguity, answered directly, baked into `spec.md`'s Clarifications section.
 
 **Spec gate.** Present the clarified `spec.md` — worth the human reading in full, not skimming a summary. Wait.
 - Approve → step 5.
@@ -74,9 +74,9 @@ Run `/speckit.specify` (Sonnet) against `concept.md` and the ADRs (standard) or 
 
 ### 5. Plan, tasks, analyze
 
-Run `/speckit.plan`, `/speckit.tasks`, `/speckit.analyze` (Sonnet) → `plan.md`, `tasks.md`.
+Run `/speckit-plan`, `/speckit-tasks`, `/speckit-analyze` (Sonnet) → `plan.md`, `tasks.md`.
 
-**Plan gate.** Present `plan.md` together with anything `/speckit.analyze` flagged as inconsistent. Wait.
+**Plan gate.** Present `plan.md` together with anything `/speckit-analyze` flagged as inconsistent. Wait.
 - Approve → step 6.
 - Revise → back to plan.
 

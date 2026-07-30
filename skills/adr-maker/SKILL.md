@@ -36,4 +36,4 @@ One file per significant decision — not one ADR for the whole proposal if it a
 
 ## Output
 
-Write one ADR file per decision, numbered and named clearly. Report back to the director when done — these feed directly into `/speckit.specify` and `/speckit.plan`, which the director runs next.
+Write one ADR file per decision, numbered and named clearly. Report back to the director when done — these feed directly into `/speckit-specify` and `/speckit-plan`, which the director runs next.

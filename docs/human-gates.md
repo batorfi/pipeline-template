@@ -29,7 +29,7 @@ Organized per gate, so you can jump straight to the one that's open rather than 
 
 ## Plan gate
 
-**Reads:** `plan.md` plus anything `/speckit.analyze` flagged as inconsistent.
+**Reads:** `plan.md` plus anything `/speckit-analyze` flagged as inconsistent.
 **Moves:**
 - **Approve** → fan-out to worker panes begins.
 - **Revise** → back to plan.

@@ -44,7 +44,8 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 
 ## Definition of "ready for the first real feature"
 
-- [ ] All 11 role skills and all 6 Spec Kit skills present under `.claude/skills/`, loading without error.
+- [ ] All 11 role skills present under `.claude/skills-pipeline-roles/`, loading without error.
+- [ ] Spec Kit's own skills present under `.claude/skills/` (confirmed against a real `specify init`: 10 skills — `speckit-constitution`, `speckit-specify`, `speckit-clarify`, `speckit-plan`, `speckit-tasks`, `speckit-analyze`, `speckit-checklist`, `speckit-implement`, `speckit-converge`, `speckit-taskstoissues` — the exact set may change with the Spec Kit version you install; this repository doesn't control or vendor it).
 - [ ] `constitution.md` structurally complete — no `<<FILL:...>>` markers remain.
 - [ ] `factory-log.md` exists, structured-entry format from entry zero, documenting the constitution's own creation.
 - [ ] The three core cmux workspaces exist and are reachable, and `.specify/cmux-workspaces.json` correctly maps `main`/`design`/`implementation` to their real IDs.

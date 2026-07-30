@@ -247,10 +247,24 @@ def scaffold(template_version: str, target: str) -> int:
 
     ready = check_constitution_ready(constitution_path)
 
+    specify_note = (
+        f"\n  NOTE: `specify init` was not run automatically (see warning above).\n"
+        f"  Run these two commands — in this exact order — to do it manually:\n"
+        f"    cd {target_path}\n"
+        f"    specify init . --integration claude\n"
+        f"  Running `specify init` from any OTHER directory (e.g., the parent you\n"
+        f"  ran this scaffold command from) will install Spec Kit there instead —\n"
+        f"  a real mistake that has happened before. The `cd` above is not optional."
+        if not specify_ran
+        else ""
+    )
+
     print(f"""
 Scaffold complete at {target_path}.
 
-Manual steps remaining:
+Manual steps remaining — run every command below from inside {target_path},
+never from its parent directory:
+
   1. Fill in every <<FILL:...>> marker in .specify/memory/constitution.md
      {'(none remain)' if ready else '(see the list above — scaffold is NOT ready until these are resolved)'}
   2. Stand up the 3 core cmux workspaces (main, design, implementation).
@@ -261,7 +275,7 @@ Manual steps remaining:
      check — do not skip it.
   5. Revisit the concurrency caps and budget figures using what that dry run
      actually logged.
-{'' if specify_ran else "\n  NOTE: `specify init` was not run automatically (see warning above) — run it manually before step 4."}
+{specify_note}
 """)
 
     return 0 if ready else 1

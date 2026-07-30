@@ -2,6 +2,18 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.11 — 2026-07-30
+
+Real-world validation from a user's first actual pilot scaffold: `specify init . --integration claude` confirmed working end to end (all 10 of Spec Kit's own skills installed correctly, zero collision with our 11 role skills — the `.claude/skills-pipeline-roles/` naming choice paid off exactly as intended). Also surfaced a recoverable-but-avoidable mistake and two doc inaccuracies, all fixed here.
+
+**Fixed:**
+- Slash-command naming corrected throughout `docs/human-gates.md` and 3 role skills: real Spec Kit skills are named `speckit-specify`, `speckit-plan`, etc. (hyphen), not `speckit.specify` (dot) as previously documented.
+- `docs/scaffolding-guide.md`'s "definition of ready" checklist claimed "6 Spec Kit skills" — a real `specify init` installs 10 (`speckit-constitution`, `speckit-specify`, `speckit-clarify`, `speckit-plan`, `speckit-tasks`, `speckit-analyze`, `speckit-checklist`, `speckit-implement`, `speckit-converge`, `speckit-taskstoissues`). Corrected, with a note that this repo doesn't control or vendor Spec Kit's own skill set and it may change.
+- `scaffold.py`'s printed checklist now embeds the literal resolved target path in its `specify init` instructions, and warns explicitly about running it from the wrong directory — after a real user ran `specify init` from the scaffold's parent directory by mistake, installing Spec Kit there instead of inside the scaffolded project. Fully recoverable (confirmed: no pre-existing content was overwritten, only new `.claude/`/`.specify/` directories were created at the wrong level) but avoidable with a clearer prompt.
+
+**Changed:**
+- README: the `specify init` unverified caveat is now split into what's actually confirmed (init behavior itself) versus what's still unverified (the specific `uv tool install specify-cli` command, since the confirming user already had `specify` via another method).
+
 ## v0.1.10 — 2026-07-30
 
 **Fixed:**

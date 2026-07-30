@@ -34,7 +34,7 @@ uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 specify --version   # confirm it installed correctly
 ```
 
-*(This install command has not been run and verified as part of this repository's own tested claims — see the caveat in the Status section below. If it doesn't work, check [GitHub Spec Kit's own install docs](https://github.com/github/spec-kit) directly.)*
+*(The `uv tool install` line itself is still unverified by this repository — see the Status section. `specify init . --integration claude` is confirmed working in real use once `specify` is on `PATH`, including installing all of Spec Kit's own skills correctly. If the install command above doesn't work for you, check [GitHub Spec Kit's own install docs](https://github.com/github/spec-kit) directly.)*
 
 If you skip this step, `scaffold.sh` will warn and continue without it — you can install it later and run `specify init . --integration claude` by hand inside the project folder once it's scaffolded (step 2 creates that folder for you; no separate `mkdir` is needed).
 
@@ -44,19 +44,19 @@ If you skip this step, `scaffold.sh` will warn and continue without it — you c
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.10 --target ./my-project
+  | bash -s -- --template-version v0.1.11 --target ./my-project
 ```
 
 *Existing project* — point `--target` at your existing repository's root instead:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.10 --target ./my-existing-repo
+  | bash -s -- --template-version v0.1.11 --target ./my-existing-repo
 ```
 
 Your existing files, git history, and `.git/` are left untouched — the scaffold only adds `.claude/skills-pipeline-roles/`, `.specify/`, `dashboard/`, `docs/`, and `specs/`. **If your project already has non-empty `dashboard/` or `docs/` directories, the scaffold refuses to run** rather than silently deleting and replacing them (this pipeline's own artifacts use those same directory names) — move your existing one aside first, or scaffold into a subdirectory instead of the project root.
 
-If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.10 --target <path>`.)
+If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.11 --target <path>`.)
 
 **3. Follow the printed checklist** — fill in `constitution.md`'s `<<FILL:...>>` markers, stand up the 3 cmux workspaces (`scaffold/prompts/setup-cmux-workspaces.md`), start the dashboard in a side pane of main (`scaffold/prompts/run-dashboard-in-pane.md`), and run one deliberately trivial synthetic feature through all 9 gates by hand before trusting it with anything real. Full walkthrough: `docs/scaffolding-guide.md`.
 
@@ -74,7 +74,7 @@ If `specify` from step 1 is on `PATH`, either form runs `specify init . --integr
 | See the whole empty-repo-to-ongoing-delivery story in one read | `docs/lifecycle-walkthrough.md` |
 | Get the dashboard running (in a cmux pane or standalone) and troubleshoot it | `docs/running-the-dashboard.md`, `scaffold/prompts/run-dashboard-in-pane.md` |
 
-## Status: v0.1.10
+## Status: v0.1.11
 
 - ✅ `factory-log/` — schema, validator, fixtures, templates (13 passing tests)
 - ✅ `constitution/` — template, structural validator, fixtures
@@ -83,6 +83,8 @@ If `specify` from step 1 is on `PATH`, either form runs `specify init . --integr
 - ✅ `docs/` — all 8 onboarding docs, including `introduction.md` (motivation, architecture, implementation principles)
 - ✅ `scaffold/scaffold.sh` + `install.sh` — fresh scaffold + `--sync`, tested end-to-end against a real target and a real anonymous clone: clone (git or curl+tar, no auth needed against this public repo), copy, render, `<<FILL:...>>` validation gate, idempotency refusal, sync diff-preview, drifted-file overwrite with constitution-value preservation, a fail-fast check for `uv` before either script does anything else, and — for scaffolding into an existing project — a pre-flight check that refuses to run rather than silently deleting a pre-existing non-empty `dashboard/` or `docs/`, tested against both a real conflict and a real non-conflicting existing project
 - ⚠️ `scaffold/prompts/setup-cmux-workspaces.md` and `run-dashboard-in-pane.md` — written from the cmux CLI reference doc, **not yet run against a live cmux instance**; the dashboard-starting commands inside the second prompt are fully verified, the cmux pane-mechanics wrapping them is not. Each prompt states this caveat and asks you to report back what actually happens.
-- ⚠️ The `specify-cli` install command in Getting Started step 1 is written from general knowledge of GitHub Spec Kit's install method, **not verified against a real install in this repository's own testing** — `specify` was never available in the environment this repository was built and tested in. If it's wrong, check [github.com/github/spec-kit](https://github.com/github/spec-kit) directly and let this repo know so the command can be corrected.
+- ✅ `specify init . --integration claude` — **confirmed working against a real Spec Kit install** (a user ran it inside a real scaffolded project, all 10 of Spec Kit's own skills installed correctly alongside our 11 role skills with zero naming collisions — validating the `.claude/skills-pipeline-roles/` naming choice made specifically to avoid this). The `uv tool install specify-cli` line in Getting Started step 1 is still unverified by us specifically (the confirming user already had `specify` installed by another method).
+- ⚠️ Real-world lesson from that same session: running `specify init` from the wrong directory (a project's parent, not the project itself) installs Spec Kit there instead — fully recoverable (nothing pre-existing gets overwritten, only new `.claude/`/`.specify/` directories are created) but avoidable. `scaffold.sh`'s printed checklist now embeds the literal target path and warns about this explicitly, since it happened for real once already.
+- ⚠️ `scaffold/prompts/setup-cmux-workspaces.md` and `run-dashboard-in-pane.md` — written from the cmux CLI reference doc, **not yet run against a live cmux instance**; the dashboard-starting commands inside the second prompt are fully verified, the cmux pane-mechanics wrapping them is not. Each prompt states this caveat and asks you to report back what actually happens.
 
 See the source project's `docs/implementation-plan.md` / `implementation-specs.md` / `implementation-tasks.md` for the full build plan this repository is being assembled against — not part of this repo, but the design record behind it.
