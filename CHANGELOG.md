@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.18 — 2026-07-30
+
+**Fixed:**
+- **Real bug, found running the dashboard for real**: every scaffolded project's dashboard backend failed to import at all — `dashboard/server/readers/_factory_log_validator.py` loads `factory-log/validator.py` from a fixed path relative to the project root at runtime, but `do_copy_steps` never copied the `factory-log/` directory into scaffolded projects in the first place (it only renders `.specify/factory-log.md`'s *content* from `factory-log/header-template.md` + `entry-zero-template.md`; the validator module itself was never part of that). `do_copy_steps` (fresh scaffold) and the `--sync` overwrite step now both copy `factory-log/validator.py` and `factory-log/SCHEMA.md` into the scaffolded project as `factory-log/`.
+- **Verified against a real scaffolded project**: applied the same fix by hand to an existing scaffold, confirmed the dashboard backend now imports and starts cleanly, and confirmed both `/log` (real data) and `/` (frontend) respond correctly over HTTP.
+
 ## v0.1.17 — 2026-07-30
 
 **Added:**

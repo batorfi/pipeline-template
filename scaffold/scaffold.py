@@ -143,6 +143,16 @@ def do_copy_steps(clone_dir: Path, target: Path) -> None:
     # nowhere to actually find them after scaffold.sh exits.
     copy_tree_atomic(clone_dir / "scaffold" / "prompts", target / "docs" / "prompts")
 
+    # dashboard/server/readers/_factory_log_validator.py loads
+    # factory-log/validator.py by a fixed path relative to the project root
+    # at runtime (parents[3] from its own file) — without copying validator.py
+    # (and SCHEMA.md, which it documents itself against) into the scaffolded
+    # project, the dashboard backend fails to import at all.
+    factory_log_dir = target / "factory-log"
+    factory_log_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(clone_dir / "factory-log" / "validator.py", factory_log_dir / "validator.py")
+    shutil.copy2(clone_dir / "factory-log" / "SCHEMA.md", factory_log_dir / "SCHEMA.md")
+
 
 # ---------------------------------------------------------------------------
 # Step: render constitution + factory-log (SCAF-001 render portion)
@@ -402,6 +412,11 @@ def sync(template_version: str, target: str) -> int:
         copy_tree_atomic(clone_dir / "dashboard", target_path / "dashboard")
         copy_tree_atomic(clone_dir / "docs", target_path / "docs")
         copy_tree_atomic(clone_dir / "scaffold" / "prompts", target_path / "docs" / "prompts")
+
+        factory_log_dir = target_path / "factory-log"
+        factory_log_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(clone_dir / "factory-log" / "validator.py", factory_log_dir / "validator.py")
+        shutil.copy2(clone_dir / "factory-log" / "SCHEMA.md", factory_log_dir / "SCHEMA.md")
 
         # Structural merge: constitution (SCAF-010)
         if constitution_path.exists():
