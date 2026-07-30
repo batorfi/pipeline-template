@@ -17,17 +17,17 @@ Or, from an existing local clone:
 scaffold/scaffold.sh --template-version <pinned-tag> --target ./my-project
 ```
 
-This mechanizes steps 1–7 below in one command: clones this template repo at the pinned tag (plain `git clone`, or `gh repo clone` if `gh` happens to be installed — neither requires auth against a public repo), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`.
+This mechanizes steps 1, 2, 3, 5, 6, and the file-copy portion of 7 in one command: clones this template repo at the pinned tag (plain `git clone`, or `gh repo clone` if `gh` happens to be installed — neither requires auth against a public repo), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`. Steps 4 (cmux workspaces) and the remainder of 7 (actually starting and confirming the dashboard) are not run by `scaffold.sh` itself — they need cmux running, which a scaffold script can't assume — use the prompts named in each step below instead. Step 8 is never automated, on purpose.
 
 ## What happens, step by step
 
 1. **Git init** the target repository.
 2. **Skills copied** into `.claude/skills/` — the 11 role skills, pulled and pinned, never hand-authored per project.
 3. **`specify init . --integration claude`** — installs Spec Kit's own 6 skills and creates `.specify/memory/`, `.specify/scripts/`, `.specify/templates/`.
-4. **Stand up the 3 core cmux workspaces** — main, design, implementation. (Review/docs/PR workspaces can be created lazily on first use.)
+4. **Stand up the 3 core cmux workspaces** — main, design, implementation. (Review/docs/PR workspaces can be created lazily on first use.) Use the prompt in `scaffold/prompts/setup-cmux-workspaces.md`, run inside a Claude Code session in your intended main workspace — cmux's CLI has no workspace-naming flag, so this prompt also writes `.specify/cmux-workspaces.json`, the name→ID mapping the director skill reads to actually address these workspaces by `--workspace <id>` instead of a name cmux doesn't understand.
 5. **Author `constitution.md`** from the rendered template — every `<<FILL:...>>` marker is a value only you can set: the triage rubric's module-boundary definition, both concurrency caps (per-feature and project-wide), both budget figures, the Opus-share ceiling percentage, and any project-specific sensitive surfaces. `scaffold.sh` refuses to consider scaffolding complete while any marker remains.
 6. **Initialize `factory-log.md`** — the constitution's own creation becomes entry zero, logged, not treated as pre-log setup.
-7. **Stand up the dashboard** — copy `dashboard/`, generate `config.json` with real paths, start the backend, confirm the frontend renders. See `docs/running-the-dashboard.md`.
+7. **Stand up the dashboard** — `dashboard/` is already copied by `scaffold.sh`; use `scaffold/prompts/run-dashboard-in-pane.md` to generate `config.json`, start the backend, and confirm the frontend renders, all in a new pane in your main workspace alongside the director. See `docs/running-the-dashboard.md` for what that prompt actually runs.
 8. **Dry-run one deliberately trivial synthetic feature** through all 9 gates by hand, approving explicitly at every gate. This is a genuine confidence check, not a formality — `scaffold.sh` does not automate this step on purpose.
 9. **Recalibrate** the concurrency caps and budget figures using what the dry run actually logged. A fresh scaffold's caps are a starting guess.
 
@@ -36,7 +36,7 @@ This mechanizes steps 1–7 below in one command: clones this template repo at t
 - [ ] All 11 role skills and all 6 Spec Kit skills present under `.claude/skills/`, loading without error.
 - [ ] `constitution.md` structurally complete — no `<<FILL:...>>` markers remain.
 - [ ] `factory-log.md` exists, structured-entry format from entry zero, documenting the constitution's own creation.
-- [ ] The three core cmux workspaces exist and are reachable.
+- [ ] The three core cmux workspaces exist and are reachable, and `.specify/cmux-workspaces.json` correctly maps `main`/`design`/`implementation` to their real IDs.
 - [ ] The dashboard's backend is running and smoke-tested; the frontend renders correctly against the near-empty state.
 - [ ] `docs/` present with all 7 files.
 - [ ] One synthetic dry-run feature has completed all 9 gates, every gate approved explicitly by a human.

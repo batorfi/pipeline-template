@@ -2,6 +2,8 @@
 
 How to get the dashboard actually up and rendering — not just aware it exists. See `concepts/claude-only-pipeline/20260720-111924_director-dashboard-status-gates-and-run-statistics.md` and `.../20260720-140033_dashboard-runtime-stack.md` for the design behind what follows.
 
+**Running inside cmux, as part of scaffolding?** Use `scaffold/prompts/run-dashboard-in-pane.md` — it wraps the exact commands below in a `cmux new-split` so the dashboard ends up in its own pane in the main workspace, alongside the director, per the pipeline design (main workspace holds exactly these two, nothing else). The rest of this document explains the commands that prompt runs; read it if the prompt fails or you're running the dashboard outside cmux entirely.
+
 ## Starting the dashboard (backend + frontend, one process)
 
 The backend is a small, read-only FastAPI app — it never writes to `factory-log.md`, `tasks.md`, or `constitution.md`, never spawns a pane, makes zero outbound network calls. The frontend's JS calls `fetch('/log')` etc. with **relative, same-origin paths** — it has no way to reach an API running on a different origin/port, so the backend and frontend must be served from the same process, not two separate servers on two separate ports. Running them as two `python -m http.server` / `uvicorn` processes on different ports will *look* like it started fine and then silently fail every API call.

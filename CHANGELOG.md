@@ -2,6 +2,16 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.5 — 2026-07-30
+
+**Added:**
+- `scaffold/prompts/setup-cmux-workspaces.md` — a prompt for a Claude Code session inside cmux to stand up the 3 core workspaces and write `.specify/cmux-workspaces.json`, a name→ID mapping. Written to close a real gap: cmux's CLI has no workspace-naming flag (`cmux new-workspace` takes no name argument), but every role skill talks about "the design workspace" as if that's something cmux understands directly. Not yet run against a live cmux instance — caveat stated plainly in the prompt itself.
+- `scaffold/prompts/run-dashboard-in-pane.md` — a prompt to create a side pane in the main workspace and start the dashboard there, matching the pipeline design (main workspace holds exactly the director and the dashboard, nothing else). The dashboard-starting command it wraps is fully verified (the same single-process form confirmed working in earlier releases); the `cmux new-split`/pane-identification wrapper around it is not yet confirmed against a live instance.
+
+**Changed:**
+- `skills/director/SKILL.md` — startup checklist now requires `.specify/cmux-workspaces.json` and explicitly defines "spawn in the design workspace" as "pass `--workspace <id>` from this file," rather than leaving workspace addressing as an unstated assumption.
+- `docs/scaffolding-guide.md` — corrected an overstated claim that `scaffold.sh` "mechanizes steps 1–7"; steps 4 (workspaces) and the remainder of 7 (starting/confirming the dashboard) were never mechanized, only the file-copy portions were. Now points at the two new prompts for the parts that genuinely need cmux running.
+
 ## v0.1.4 — 2026-07-30
 
 **Fixed:**
