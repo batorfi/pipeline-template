@@ -2,6 +2,15 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.8 — 2026-07-30
+
+**Added:**
+- `docs/introduction.md` — a comprehensive technical overview for a wider audience: the problem this pipeline solves, the reasoning behind spec-first design and human gates, the architectural perspective (single coordinator, ephemeral specialists, workspace boundaries, the append-only log as system of record, the dashboard as observability-not-control), the implementation principles this repository itself follows (pull-never-fork, bundled versioning, fail-fast dependencies, structural safety over trust, tested-vs-labeled-untested documentation), and an explicit "what this doesn't solve" section.
+
+**Changed:**
+- `README.md` links `docs/introduction.md` at the very top, before the display-name note, for anyone evaluating whether this fits their situation before reading how to run it. Also added to the doc-routing table.
+- Fixed a doc-count drift (README said "all 7 onboarding docs," now 8 with `introduction.md`).
+
 ## v0.1.7 — 2026-07-30
 
 **Changed:**

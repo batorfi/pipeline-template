@@ -1,0 +1,54 @@
+# Introduction: motivation, architecture, and implementation principles
+
+A technical overview for anyone evaluating whether this pipeline fits their situation, not just how to run it — the "why" behind the "how" in the rest of `docs/`.
+
+## The problem
+
+Handing a coding agent a task with no shared, explicit specification has a predictable failure mode: "done" becomes whatever the agent decided it meant, scope creeps past the boundary you actually intended, and there's no reliable signal for which tasks are safe to run in parallel without conflicting. This holds even with a very capable model — a fast, competent agent working from an ambiguous instruction still drifts from the requester's real intent, just less often and less severely than a weaker model would. The failure isn't capability, it's the absence of a contract both sides can be checked against.
+
+Two adjacent failure modes compound this at scale. First, **unbounded autonomy is a cost and correctness risk, not just a control preference**: an agent that decides on its own how much to build, refactor, or "improve while it's in there" will eventually do something expensive and wrong in the same turn it does something cheap and right, and you won't know which is which until you read the diff carefully — by which point the cost of the mistake has already been paid. Second, **treating every task as equally deserving of the strongest available model is wasteful**, and treating every task as equally safe on the cheapest available model is reckless — most real work is neither uniformly hard nor uniformly trivial.
+
+This pipeline is a specific, opinionated answer to all three problems at once: specification as a shared contract, human approval as a non-negotiable gate at every consequential decision, and cost tiered by the actual consequence of a role's mistake rather than a flat policy in either direction.
+
+## Design reasoning
+
+**Why specification-first, not prompt-first.** GitHub Spec Kit's `constitution → specify → clarify → plan → tasks → analyze → implement` chain exists to put the specification, not the code, at the center of the workflow — implementation is gated behind a chain of reviewable markdown artifacts instead of one long, ad hoc prompt. This pipeline adopts that chain as its backbone rather than inventing a parallel one, for a concrete reason: a Spec Kit task line already carries a task ID, a parallel-safety marker (`[P]`), a story label, and an exact file path — everything a multi-agent dispatch system needs, generated from the plan rather than hand-written. Building a bespoke task-dispatch format on top of an already-adequate one would be solving a problem that doesn't exist.
+
+**Why nine human gates, not autonomous end-to-end execution.** Automation gets you to a well-formed choice fast; it doesn't get to make the choice. Every phase transition in this pipeline — concept, architecture, spec, plan, each implementation checkpoint, review, verification, docs, and the PR itself — is a point where a wrong decision compounds into everything built on top of it, and where a human's judgment is cheap to apply *now* versus expensive to apply after the fact. The gates aren't a lack of trust in the model; they're a recognition that "produces plausible output" and "is the output you actually wanted" are different questions, and only one of them the model can answer for itself.
+
+**Why independent review roles, not self-review.** An agent critiquing its own just-written proposal is a structurally weaker check than an independent pass with no investment in the original answer — the architecture critic runs in its own fresh context specifically so it isn't the designer second-guessing itself. This same principle shows up again at the review gate (an independent reviewer checking the whole accumulated diff against spec intent, not just "do the tests pass") and at verification (exercising each story end-to-end against criteria defined *before* implementation started, not derived from what was built). Every one of these is the same idea applied at a different layer: the check has to be independent of the thing being checked, or it isn't really a check.
+
+**Why cost tiered by consequence, not by task size.** The roles where a mistake is expensive to have missed — the architecture critic, the code reviewer, verification diagnosis — get the strongest available model, regardless of how "big" the task looks. Everywhere else, a human gate immediately downstream is the primary check, so the model is producing a draft or a first pass for that gate to catch problems in, and a mid-tier model is enough. Small, mechanical, low-ambiguity tasks get the cheapest tier, with an automatic one-hop escalation cascade (cheap → mid → strong) if a task turns out harder than its initial classification assumed — so the tier assignment only has to be a reasonable starting guess, not a perfect prediction made in advance.
+
+## Architectural perspective
+
+**One coordinator, ephemeral specialists.** A single persistent **director** pane spawns every other pane for the duration of one stage's work, then tears it down — the concept writer, architecture designer and critic, ADR maker, workers, reviewer, verifier, techwriter, and PR writer are all ephemeral, each existing only as long as its one job takes. The director is the only pane a human ever talks to directly; it never shares a workspace with anything it spawns, and it never implements anything itself — every implementation task, even a one-line change, goes to a worker pane.
+
+**Workspaces split by what's being watched versus what's doing the work.** Six cmux workspaces: **main** (the director and a read-only dashboard, nothing else, ever), **design** (judgment/synthesis roles — concept, architecture, ADR, verification), **implementation** (worker panes, the one workspace meant to run several panes concurrently since `[P]` tasks are parallel by construction), and single-pane, spawned-on-demand **review**, **docs**, and **PR** workspaces. The rule is simple and never violated: every spawn crosses a workspace boundary.
+
+**A single append-only log as the system of record.** `factory-log.md` is one continuous, project-wide file — not one per feature — with every entry tagged by feature ID, gate decisions, model tier, escalation history, and cost. It is never edited or reordered after an entry is written, only appended to; a correction is a new entry, not a mutation. This is what makes the dashboard, the run statistics, and the audit trail all derive from the same single source of truth instead of three things that can silently disagree.
+
+**A read-only dashboard, not a control plane.** The dashboard (a small FastAPI backend plus a vanilla-JS frontend, zero external network calls, zero write access to any pipeline file) exists to answer one question at a glance — does anything need you right now — and to make the log's history legible without requiring anyone to read raw markdown. It never spawns a pane, never talks to a model, and never decides a gate. Observability and control are deliberately different systems.
+
+## Implementation principles
+
+These are the discipline choices that shaped how this repository itself is built, not just what it produces:
+
+- **Pull, never fork.** Every project scaffolded from this repository pulls a pinned, tagged version and never patches its local copy of a skill, the dashboard, or the docs in place. A real problem found in a scaffolded project gets fixed here, reviewed, re-tagged, and re-synced — not silently patched in one project while every other project using the same template drifts further from it.
+- **Bundled versioning, not per-component.** One tag names one consistent state of skills, dashboard, log schema, and constitution template together, because these artifacts aren't independent of each other — a worker skill's escalation-reporting format has to match exactly what the dashboard's parser expects, for instance. Letting components drift to different pinned versions would silently reopen the exact consistency problem version-pinning exists to prevent.
+- **Fail fast on real dependencies, don't work around them.** `uv` is a stated hard requirement, checked before either the installer or the scaffold script does anything else, with an install link printed immediately — not a silent fallback to some other mechanism that might paper over a real gap.
+- **Structural safety over trust.** The scaffold script refuses to re-render a `constitution.md` that already exists (protecting a human's in-progress edits from being silently overwritten), and `--sync` shows a full diff preview and asks for confirmation before touching anything. Neither of these was in the original design — both were added after testing surfaced the exact failure they now prevent.
+- **Every claim in this repository's own documentation is either tested or labeled as untested.** Where something has been verified end-to-end against a real target and a real running process (the scaffold script, the dashboard's backend), the docs say so plainly. Where something hasn't — the cmux pane-mechanics in the setup prompts, `/panes`' exact response shape against a live cmux instance — the docs say that plainly too, with an explicit ask to report back what actually happens. Untested and broken look identical from the outside if you don't say which one you mean.
+
+## What this deliberately does not solve
+
+Two limitations persist regardless of tuning, stated here rather than implied away:
+
+- **A spec that under-specifies an edge case won't be caught by any downstream gate** — review and verification are both checking the implementation against the same spec that missed the case in the first place. A stronger model at every tier reduces how often this happens; it doesn't structurally prevent it.
+- **A feature misclassified as "small" at triage only surfaces that mistake after skipping the gates that would have caught it.** Routing a review-gate restart back through triage (not straight to spec) mitigates this — a second pass gets a second chance to classify correctly — but doesn't eliminate the underlying risk that the one role making that call has no independent check on itself.
+
+Both are named, not hidden, because a tool that claims to solve every failure mode it touches is less trustworthy than one that's specific about where its guarantees actually end.
+
+## Who this is and isn't for
+
+Built for solo engineers and small teams running real feature work through Claude Code who want more structure than an ad hoc prompt-per-task loop, without building the scaffolding themselves. The whole gate design assumes **one human** approving decisions, not a review board or a multi-stakeholder sign-off process — if your organization needs the latter, the nine gates in this design are a starting point to adapt, not a finished answer for that shape of team.
