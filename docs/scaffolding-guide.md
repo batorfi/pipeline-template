@@ -19,6 +19,17 @@ scaffold/scaffold.sh --template-version <pinned-tag> --target ./my-project
 
 This mechanizes steps 1, 2, 3, 5, 6, and the file-copy portion of 7 in one command: clones this template repo at the pinned tag (plain `git clone`, or `gh repo clone` if `gh` happens to be installed — neither requires auth against a public repo), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`. Steps 4 (cmux workspaces) and the remainder of 7 (actually starting and confirming the dashboard) are not run by `scaffold.sh` itself — they need cmux running, which a scaffold script can't assume — use the prompts named in each step below instead. Step 8 is never automated, on purpose.
 
+## How to run a `docs/prompts/*.md` file
+
+Steps 4 and 7 below are done by hand, using `docs/prompts/setup-cmux-workspaces.md` and `docs/prompts/run-dashboard-in-pane.md`. These are **not** scripts and there is no CLI command that runs them — each is a markdown file containing one block of instructions meant to be pasted, as-is, into an active Claude Code session:
+
+1. Open cmux and start (or switch to) a Claude Code session in the workspace you intend to become **main** — the one the director and the dashboard will live in. `scaffold.sh` itself never opens or touches cmux, so this session is something you start yourself, after scaffolding finishes.
+2. Open the prompt file in your scaffolded project (`docs/prompts/setup-cmux-workspaces.md` or `docs/prompts/run-dashboard-in-pane.md`) and copy everything inside the fenced code block under its own `## The prompt` heading — not the surrounding explanation, just that block.
+3. Paste it as a message to that Claude Code session. It then runs the real `cmux` and shell commands itself, since it has an actual terminal and an actual cmux socket to talk to — a plain assistant session with no cmux underneath it (e.g. one running outside cmux entirely) cannot execute these for you.
+4. Run `setup-cmux-workspaces.md` first (step 4) — it produces `.specify/cmux-workspaces.json`. Run `run-dashboard-in-pane.md` afterward (step 7), in the same or a new session, still inside main — it opens a `cmux new-split` and starts the dashboard inside it.
+
+Both prompts state their own caveats and ask you to report back what actually happened the first time you run them for real — neither has been exercised against a live cmux instance as part of this template's own test suite (see the Status section in the top-level README).
+
 ## Scaffolding into an existing project
 
 `--target` doesn't have to be an empty or new directory — point it at an existing repository's root to add this pipeline to a codebase you already have. Existing files, git history, and `.git/` are left alone; the scaffold only adds `.claude/skills-pipeline-roles/`, `.specify/`, `dashboard/`, `docs/`, and `specs/`.
@@ -35,10 +46,10 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 1. **Git init** the target repository.
 2. **Skills copied** into `.claude/skills/` — the 11 role skills, pulled and pinned, never hand-authored per project.
 3. **`specify init . --integration claude`** — installs Spec Kit's own 6 skills and creates `.specify/memory/`, `.specify/scripts/`, `.specify/templates/`.
-4. **Stand up the 3 core cmux workspaces** — main, design, implementation. (Review/docs/PR workspaces can be created lazily on first use.) Use the prompt in `scaffold/prompts/setup-cmux-workspaces.md`, run inside a Claude Code session in your intended main workspace — cmux's CLI has no workspace-naming flag, so this prompt also writes `.specify/cmux-workspaces.json`, the name→ID mapping the director skill reads to actually address these workspaces by `--workspace <id>` instead of a name cmux doesn't understand.
+4. **Stand up the 3 core cmux workspaces** — main, design, implementation. (Review/docs/PR workspaces can be created lazily on first use.) Paste `docs/prompts/setup-cmux-workspaces.md`'s prompt into a Claude Code session running inside cmux, in your intended main workspace — see "How to run a `docs/prompts/*.md` file," above. cmux's CLI has no workspace-naming flag, so this prompt also writes `.specify/cmux-workspaces.json`, the name→ID mapping the director skill reads to actually address these workspaces by `--workspace <id>` instead of a name cmux doesn't understand.
 5. **Author `constitution.md`** from the rendered template — every `<<FILL:...>>` marker is a value only you can set: the triage rubric's module-boundary definition, both concurrency caps (per-feature and project-wide), both budget figures, the Opus-share ceiling percentage, and any project-specific sensitive surfaces. `scaffold.sh` refuses to consider scaffolding complete while any marker remains.
 6. **Initialize `factory-log.md`** — the constitution's own creation becomes entry zero, logged, not treated as pre-log setup.
-7. **Stand up the dashboard** — `dashboard/` is already copied by `scaffold.sh`; use `scaffold/prompts/run-dashboard-in-pane.md` to generate `config.json`, start the backend, and confirm the frontend renders, all in a new pane in your main workspace alongside the director. See `docs/running-the-dashboard.md` for what that prompt actually runs.
+7. **Stand up the dashboard** — `dashboard/` is already copied by `scaffold.sh`; paste `docs/prompts/run-dashboard-in-pane.md`'s prompt into a Claude Code session in your main workspace (same mechanism as step 4, above) to generate `config.json`, start the backend, and confirm the frontend renders, all in a new pane alongside the director. See `docs/running-the-dashboard.md` for what that prompt actually runs, or to run those commands by hand outside cmux entirely.
 8. **Dry-run one deliberately trivial synthetic feature** through all 9 gates by hand, approving explicitly at every gate. This is a genuine confidence check, not a formality — `scaffold.sh` does not automate this step on purpose.
 9. **Recalibrate** the concurrency caps and budget figures using what the dry run actually logged. A fresh scaffold's caps are a starting guess.
 

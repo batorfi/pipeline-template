@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.15 — 2026-07-30
+
+**Fixed:**
+- `scaffold/prompts/setup-cmux-workspaces.md` and `run-dashboard-in-pane.md` only ever lived in this template repo — a scaffolded project had no local copy of them, so the printed post-scaffold checklist pointed a developer at files they had no way to find. `do_copy_steps` (fresh scaffold) and the `--sync` overwrite step now both copy `scaffold/prompts/` into the scaffolded project as `docs/prompts/`. The printed checklist and `docs/scaffolding-guide.md` now point at `docs/prompts/...` (the copied, in-project location) instead of the template repo's own `scaffold/prompts/...`. Verified locally: `do_copy_steps` run against this repo produces `docs/prompts/setup-cmux-workspaces.md` and `docs/prompts/run-dashboard-in-pane.md` in the target.
+- Neither the README nor `docs/scaffolding-guide.md` previously explained *how* a `docs/prompts/*.md` file is actually run — each prompt's own header covered it, but nothing said so before a reader got there. Added a "How to run a `docs/prompts/*.md` file" section to `docs/scaffolding-guide.md` (paste the fenced code block into a Claude Code session running inside cmux, in your intended main workspace) and a pointer to it from the README's Getting Started step 3.
+
 ## v0.1.14 — 2026-07-30
 
 **Confirmed:**
