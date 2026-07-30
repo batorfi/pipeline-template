@@ -2,6 +2,11 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.6 — 2026-07-30
+
+**Changed:**
+- Display name updated to **AI Software Factory Pipeline Template** in `README.md`'s title and the GitHub repo description. Display-name-only change: the repo slug (`pipeline-template`), all clone/install URLs, and every hardcoded path stay exactly as they were — nothing else in this release.
+
 ## v0.1.5 — 2026-07-30
 
 **Added:**

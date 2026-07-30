@@ -1,4 +1,6 @@
-# pipeline-template
+# AI Software Factory Pipeline Template
+
+*(repository: [`pipeline-template`](https://github.com/batorfi/pipeline-template) — the repo slug and all clone/install URLs stay unchanged; this is a display-name update only.)*
 
 Canonical template repository for the Claude-only spec-driven multi-agent development pipeline: one persistent **director** pane coordinates a feature's entire lifecycle — from a raw idea to an opened merge request — spawning ephemeral Claude Code panes for each stage, running GitHub Spec Kit's phases, and stopping at nine human gates along the way.
 
