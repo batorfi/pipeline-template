@@ -3,14 +3,23 @@
 # without cloning the repo yourself first:
 #
 #   curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-#     | bash -s -- --template-version v0.1.2 --target ./my-project
+#     | bash -s -- --template-version v0.1.4 --target ./my-project
 #
 # All arguments after `--` are passed straight through to scaffold/scaffold.sh
 # (including --sync). This script's only job is: get a copy of the template
 # repo onto disk (git or curl+tar, whichever's available), then exec the real
 # scaffold script from inside it — it does not duplicate any scaffolding
 # logic itself.
+#
+# Requires `uv` (https://docs.astral.sh/uv/) — a stated prerequisite, checked
+# up front rather than discovered as a confusing failure partway through.
 set -euo pipefail
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "ERROR: uv is required but not found on PATH." >&2
+  echo "Install it: https://docs.astral.sh/uv/getting-started/installation/" >&2
+  exit 1
+fi
 
 TEMPLATE_REPO="batorfi/pipeline-template"
 TEMPLATE_REPO_URL="https://github.com/${TEMPLATE_REPO}.git"

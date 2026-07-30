@@ -2,6 +2,15 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.4 — 2026-07-30
+
+**Fixed:**
+- Both `install.sh` and `scaffold/scaffold.sh` now check for `uv` up front and fail with a clear, actionable install link if it's missing, instead of failing deep inside a `uv run` invocation with a generic "command not found." `uv` is a stated hard dependency (not silently worked around), so this is a fast, honest failure rather than a fallback.
+- Local working-copy drift fixed: `README.md` and `CHANGELOG.md` in the source project's `outcomes/pipeline-template/` had gone stale (only ever updated in throwaway publish clones, never synced back) — resolved by pulling the published state back into the working copy before this release, so the two stay in sync going forward.
+
+**Changed:**
+- `README.md` restructured as an actual onboarding entry point — prerequisites, a 3-step getting-started flow, and a table routing to the right doc for what you're trying to do — rather than a status page with a getting-started link buried in prose.
+
 ## v0.1.3 — 2026-07-30
 
 Repository visibility changed to **public**. This release makes the tooling reflect that.
