@@ -4,11 +4,20 @@ Condensed from `concepts/claude-only-pipeline/20260720-113747_repeatable-codebas
 
 ## Running scaffold.sh
 
+Directly from the web, no local clone needed (the repo is public, so this needs no GitHub auth):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
+  | bash -s -- --template-version <pinned-tag> --target ./my-project
+```
+
+Or, from an existing local clone:
+
 ```bash
 scaffold/scaffold.sh --template-version <pinned-tag> --target ./my-project
 ```
 
-This mechanizes steps 1–7 below in one command: clones this template repo at the pinned tag (authenticated via `gh`), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`.
+This mechanizes steps 1–7 below in one command: clones this template repo at the pinned tag (plain `git clone`, or `gh repo clone` if `gh` happens to be installed — neither requires auth against a public repo), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`.
 
 ## What happens, step by step
 

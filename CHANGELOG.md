@@ -2,6 +2,19 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.3 — 2026-07-30
+
+Repository visibility changed to **public**. This release makes the tooling reflect that.
+
+**Added:**
+- `install.sh` — a bootstrap installer at the repo root enabling `curl -fsSL .../install.sh | bash -s -- --template-version <tag> --target ./my-project` with no local clone required. Uses `git clone` if available, falls back to downloading the tagged tarball via `curl` + `tar` if `git` isn't present, and delegates all real scaffolding logic to `scaffold/scaffold.sh` inside the fetched copy — no logic duplicated between the two.
+
+**Changed:**
+- `scaffold/scaffold.py`'s clone step no longer requires `gh` or any authentication. Since the repo is public, a plain `git clone` works unauthenticated; `gh repo clone` is still tried first if `gh` is installed (marginally more resilient behind some proxies), but any `gh` failure — including "not authenticated" — now falls through to plain `git` instead of aborting. Confirmed by removing `gh` from `PATH` entirely and re-running a fresh scaffold successfully.
+- `docs/scaffolding-guide.md` and the README now document the `curl | bash` install path as the primary way to scaffold a new project.
+
+**Fixed nothing new** in this release beyond the above — see v0.1.2 for the dashboard project-root fix and v0.1.1 for `scaffold.sh` itself.
+
 ## v0.1.2 — 2026-07-30
 
 **Fixed:**

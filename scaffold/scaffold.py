@@ -24,6 +24,7 @@ from render import render_constitution, render_entry_zero
 from validate_constitution import validate_constitution
 
 TEMPLATE_REPO = "batorfi/pipeline-template"
+TEMPLATE_REPO_URL = f"https://github.com/{TEMPLATE_REPO}.git"
 
 
 class ScaffoldError(Exception):
@@ -32,20 +33,33 @@ class ScaffoldError(Exception):
 
 
 # ---------------------------------------------------------------------------
-# Step: authenticated clone at a pinned tag (SCAF-000, SCAF-001 clone portion)
+# Step: clone at a pinned tag (SCAF-000, SCAF-001 clone portion)
 # ---------------------------------------------------------------------------
+#
+# The template repository is public, so this needs no authentication at all —
+# a plain, anonymous `git clone` works. If `gh` happens to be installed and
+# authenticated, prefer it (marginally more resilient behind some corporate
+# proxies/mirrors that intercept plain git but allow the GitHub API), but
+# fall back to plain git rather than requiring gh — a curl-piped installer
+# with no gh available must still work.
 
 def clone_template(template_version: str, dest: Path) -> Path:
-    auth_check = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True)
-    if auth_check.returncode != 0:
-        raise ScaffoldError(
-            "gh is not authenticated on this machine. Run `gh auth login` and retry.\n"
-            f"(gh auth status said: {auth_check.stderr.strip()})"
-        )
-
     clone_dir = dest / "_template_clone"
+
+    gh_available = shutil.which("gh") is not None
+    if gh_available:
+        result = subprocess.run(
+            ["gh", "repo", "clone", TEMPLATE_REPO, str(clone_dir), "--", "--branch", template_version, "--depth", "1"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            return clone_dir
+        # Fall through to plain git on any gh failure (including "not authenticated") —
+        # the repo is public, plain git doesn't need what gh failed on.
+
     result = subprocess.run(
-        ["gh", "repo", "clone", TEMPLATE_REPO, str(clone_dir), "--", "--branch", template_version, "--depth", "1"],
+        ["git", "clone", "--branch", template_version, "--depth", "1", TEMPLATE_REPO_URL, str(clone_dir)],
         capture_output=True,
         text=True,
     )
@@ -54,7 +68,7 @@ def clone_template(template_version: str, dest: Path) -> Path:
         if "not found" in stderr or "could not find remote branch" in stderr or "reference is not a tree" in stderr:
             raise ScaffoldError(
                 f"Template version '{template_version}' not found in {TEMPLATE_REPO}. "
-                f"Check the tag exists: gh api repos/{TEMPLATE_REPO}/tags"
+                f"Check the tag exists: https://github.com/{TEMPLATE_REPO}/tags"
             )
         raise ScaffoldError(f"Clone of {TEMPLATE_REPO}@{template_version} failed:\n{result.stderr}")
 
