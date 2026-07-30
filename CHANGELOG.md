@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.20 — 2026-07-30
+
+**Added:**
+- `docs/working-with-the-director.md` — the operational piece missing from the doc set: how to actually start the director (a Claude Code session in main with the `director` skill loaded, not a separate program), how to hand it a feature, and how to respond at a gate (plain-language chat, not the dashboard). Prompted directly by a real point of confusion: a user tried clicking "approve" in the dashboard UI and nothing happened, because the dashboard is intentionally read-only and has no button wired to do anything — this doc states that plainly and explains where a decision actually needs to go instead.
+- Linked from README, `docs/getting-started.md`, `docs/scaffolding-guide.md` (steps 8 and the checklist), and the printed post-scaffold checklist in `scaffold.py`. `docs/` file count bumped from 10 to 11.
+
 ## v0.1.19 — 2026-07-30
 
 **Fixed:**

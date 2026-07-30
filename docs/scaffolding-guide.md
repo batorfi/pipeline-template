@@ -50,7 +50,7 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 5. **Author `constitution.md`** from the rendered template — every `<<FILL:...>>` marker is a value only you can set: the triage rubric's module-boundary definition, both concurrency caps (per-feature and project-wide), both budget figures, the Opus-share ceiling percentage, and any project-specific sensitive surfaces. `scaffold.sh` refuses to consider scaffolding complete while any marker remains.
 6. **Initialize `factory-log.md`** — the constitution's own creation becomes entry zero, logged, not treated as pre-log setup.
 7. **Stand up the dashboard** — `dashboard/` is already copied by `scaffold.sh`; paste `docs/prompts/run-dashboard-in-pane.md`'s prompt into a Claude Code session in your main workspace (same mechanism as step 4, above) to generate `config.json`, start the backend, and confirm the frontend renders, all in a new pane alongside the director. See `docs/running-the-dashboard.md` for what that prompt actually runs, or to run those commands by hand outside cmux entirely.
-8. **Dry-run one deliberately trivial synthetic feature** through all 9 gates by hand, approving explicitly at every gate. This is a genuine confidence check, not a formality — `scaffold.sh` does not automate this step on purpose.
+8. **Dry-run one deliberately trivial synthetic feature** through all 9 gates by hand, approving explicitly at every gate. This is a genuine confidence check, not a formality — `scaffold.sh` does not automate this step on purpose. See `docs/working-with-the-director.md` for how to actually start the director and respond at a gate.
 9. **Recalibrate** the concurrency caps and budget figures using what the dry run actually logged. A fresh scaffold's caps are a starting guess.
 
 ## Definition of "ready for the first real feature"
@@ -61,7 +61,7 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 - [ ] `factory-log.md` exists, structured-entry format from entry zero, documenting the constitution's own creation.
 - [ ] The three core cmux workspaces exist and are reachable, and `.specify/cmux-workspaces.json` correctly maps `main`/`design`/`implementation` to their real IDs.
 - [ ] The dashboard's backend is running and smoke-tested; the frontend renders correctly against the near-empty state.
-- [ ] `docs/` present with all 10 files.
+- [ ] `docs/` present with all 11 files.
 - [ ] One synthetic dry-run feature has completed all 9 gates, every gate approved explicitly by a human.
 - [ ] Concurrency caps and budget figures have been revisited at least once using the dry run's own data.
 

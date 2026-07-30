@@ -6,6 +6,7 @@ This is the Claude-only spec-driven multi-agent development pipeline: one persis
 
 - **Scaffolding a new project?** → `docs/scaffolding-guide.md`
 - **Want the full pipeline explained before running it?** → `docs/workflow-overview.md`
+- **Ready to actually start the director and run a feature?** → `docs/working-with-the-director.md`
 - **Sitting at an open gate right now, need to know what it's asking?** → `docs/human-gates.md`
 - **Filling in `constitution.md`'s placeholders?** → `docs/constitution-authoring-guide.md`
 - **Want the whole story, empty repo to ongoing feature delivery, in one read?** → `docs/lifecycle-walkthrough.md`

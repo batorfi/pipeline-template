@@ -330,7 +330,9 @@ never from its parent directory:
      docs/prompts/run-dashboard-in-pane.md and docs/running-the-dashboard.md.
   4. Run one deliberately trivial synthetic feature through all 9 gates by
      hand, approving explicitly at every gate. This is a genuine confidence
-     check — do not skip it.
+     check — do not skip it. See docs/working-with-the-director.md for how
+     to actually start the director and respond at a gate (the dashboard
+     is read-only — you respond in the director's own chat, not there).
   5. Revisit the concurrency caps and budget figures using what that dry run
      actually logged.
 {specify_note}
