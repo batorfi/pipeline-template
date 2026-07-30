@@ -2,6 +2,14 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.10 — 2026-07-30
+
+**Fixed:**
+- **`scaffold.py`: scaffolding into an existing project with its own `dashboard/` or `docs/` directory would silently delete and replace them.** `copy_tree_atomic` unconditionally ran `shutil.rmtree(dst)` if the destination already existed — fine for a genuinely fresh target, a real data-loss risk for an existing codebase that happens to already own either of those directory names. Fixed with a pre-flight check (`check_no_conflicting_existing_content`), run before the network clone even starts, that refuses cleanly with an actionable message instead of destroying existing content. Verified against both a real conflict (existing non-empty `docs/`, refused, content untouched) and a real non-conflicting existing project (own `src/`, no `docs/`/`dashboard/`, scaffolded successfully alongside existing files).
+
+**Added:**
+- README and `docs/scaffolding-guide.md` now document scaffolding into an existing project explicitly, including the new safety check and what to do if it triggers.
+
 ## v0.1.9 — 2026-07-30
 
 **Added:**

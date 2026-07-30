@@ -19,6 +19,17 @@ scaffold/scaffold.sh --template-version <pinned-tag> --target ./my-project
 
 This mechanizes steps 1, 2, 3, 5, 6, and the file-copy portion of 7 in one command: clones this template repo at the pinned tag (plain `git clone`, or `gh repo clone` if `gh` happens to be installed — neither requires auth against a public repo), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`. Steps 4 (cmux workspaces) and the remainder of 7 (actually starting and confirming the dashboard) are not run by `scaffold.sh` itself — they need cmux running, which a scaffold script can't assume — use the prompts named in each step below instead. Step 8 is never automated, on purpose.
 
+## Scaffolding into an existing project
+
+`--target` doesn't have to be an empty or new directory — point it at an existing repository's root to add this pipeline to a codebase you already have. Existing files, git history, and `.git/` are left alone; the scaffold only adds `.claude/skills-pipeline-roles/`, `.specify/`, `dashboard/`, `docs/`, and `specs/`.
+
+**Safety check, not a suggestion.** If the target already has a non-empty `dashboard/` or `docs/` directory — common names an existing project might already own — `scaffold.sh` refuses to run rather than silently deleting and replacing them (an earlier version of this script did exactly that unconditionally; fixed once the risk was noticed, not after it caused real data loss). If you hit this:
+- Move or rename your existing `dashboard/`/`docs/` directory before scaffolding, then move its contents back in afterward and resolve any real overlap by hand, or
+- Scaffold into a subdirectory of your project instead of the root, or
+- Open an issue if neither of those fits your situation — the check is deliberately conservative and may be worth relaxing for specific cases once there's a real one to design around.
+
+This check does not currently look for narrower conflicts (e.g., a single file your project happens to also have inside `.specify/` or `specs/`) — it's scoped to the two directory names most likely to collide, not an exhaustive existing-file scan.
+
 ## What happens, step by step
 
 1. **Git init** the target repository.

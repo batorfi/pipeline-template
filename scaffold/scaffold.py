@@ -99,6 +99,34 @@ def copy_tree_atomic(src: Path, dst: Path) -> None:
     tmp_dst.rename(dst)
 
 
+CONFLICTING_PATHS = ("dashboard", "docs")  # generic names an existing project may already own
+
+
+def check_no_conflicting_existing_content(target: Path) -> None:
+    """Fresh scaffold refuses to run if the target already has non-empty
+    dashboard/ or docs/ directories — copy_tree_atomic's destructive
+    shutil.rmtree(dst) would otherwise silently delete an existing project's
+    own content with those names. This check exists specifically for
+    scaffolding INTO an existing codebase, not just an empty directory —
+    an empty/fresh target never trips it. Caught during a documentation
+    pass, not a test run: worth being honest that this was found by
+    thinking through the "existing project" case, not by exercising it."""
+    conflicts = []
+    for name in CONFLICTING_PATHS:
+        p = target / name
+        if p.exists() and any(p.iterdir()):
+            conflicts.append(name)
+
+    if conflicts:
+        listed = ", ".join(f"'{c}/'" for c in conflicts)
+        raise ScaffoldError(
+            f"Target already has non-empty {listed} — scaffolding would silently delete and "
+            "replace it (this pipeline's own dashboard/docs use those same directory names). "
+            "Move or rename your existing directory first, then re-run scaffold, or scaffold "
+            "into a subdirectory instead of your project's root."
+        )
+
+
 def do_copy_steps(clone_dir: Path, target: Path) -> None:
     copy_tree_atomic(clone_dir / "skills", target / ".claude" / "skills-pipeline-roles")
     copy_tree_atomic(clone_dir / "dashboard", target / "dashboard")
@@ -199,6 +227,8 @@ def scaffold(template_version: str, target: str) -> int:
             "filled in (SCAF-AC2 requires this NOT happen). Use `--sync` instead, which preserves "
             "your existing constitution values and only merges in new required sections."
         )
+
+    check_no_conflicting_existing_content(target_path)
 
     if not (target_path / ".git").exists():
         subprocess.run(["git", "init"], cwd=target_path, check=True, capture_output=True)
