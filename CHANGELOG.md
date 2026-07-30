@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.7 — 2026-07-30
+
+**Changed:**
+- `README.md`: added a "What this is, who it's for, and why" section — what the pipeline actually delivers, who it's built for (solo engineers/small teams, one human approving gates, not a review board), and the specific failure mode (ungated agent drift, no parallel-safety signal) it exists to fix.
+- Fixed stale version references left over from the v0.1.6 display-name-only release (README's install examples and Status header still said `v0.1.5`).
+
 ## v0.1.6 — 2026-07-30
 
 **Changed:**

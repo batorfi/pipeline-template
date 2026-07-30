@@ -6,6 +6,14 @@ Canonical template repository for the Claude-only spec-driven multi-agent develo
 
 Every artifact a new project's scaffold needs — the 11 role skills, the dashboard (frontend + read-only Python backend), `factory-log.md`'s schema and templates, the constitution template, `scaffold.sh`, and onboarding docs — lives here, versioned as one bundle. Projects scaffold from a specific tagged version of this repository and never fork it — a fix belongs here, reviewed and re-tagged, not patched locally in a consuming project.
 
+## What this is, who it's for, and why
+
+**What it is.** A reusable template for bootstrapping a *spec-driven, gated, cost-tiered* Claude Code pipeline into any codebase — not a framework you import, a set of files (skills, a constitution, a dashboard, scaffolding tooling) you pull into a project once and then run features through, versioned and re-synced like any other dependency.
+
+**Who it's for.** Anyone running non-trivial feature work through Claude Code who wants more structure than an ad hoc prompt-per-task loop, but doesn't want to build the scaffolding themselves — solo engineers and small teams in particular, since the whole design assumes one human approving gates, not a review board. It was built for, and is actively used by, the maintainer's own projects first; it's public so anyone in the same situation can use it too, and so fixes and improvements have somewhere real to land instead of drifting apart across private forks.
+
+**Why it exists.** Handing an agent a task with no shared, explicit specification has a predictable failure mode: "done" becomes whatever the agent decided it meant, scope creeps past the boundary you intended, and there's no reliable signal for which tasks are safe to run in parallel without conflicting — this holds even with a very capable model, just less severely. This pipeline exists to fix that without inventing a bespoke process: it puts GitHub Spec Kit's spec → plan → tasks artifacts at the center (so `[P]`-tagged, file-scoped task lines double as the parallel-dispatch contract for free), wraps them in nine explicit human gates so nothing ships without a decision you actually made, and tiers cost (Opus/Sonnet/Haiku) by the actual consequence of a role's mistake rather than treating every step as equally expensive or equally trustworthy.
+
 ## Prerequisites
 
 - **[`uv`](https://docs.astral.sh/uv/getting-started/installation/)** — required. Both `install.sh` and `scaffold/scaffold.sh` check for it up front and fail with an install link if it's missing, rather than a confusing error partway through.
@@ -20,10 +28,10 @@ No GitHub account or auth of any kind is needed — this repository is public.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.5 --target ./my-project
+  | bash -s -- --template-version v0.1.7 --target ./my-project
 ```
 
-(Or, from an existing local clone: `scaffold/scaffold.sh --template-version v0.1.5 --target ./my-project`.)
+(Or, from an existing local clone: `scaffold/scaffold.sh --template-version v0.1.7 --target ./my-project`.)
 
 **2. Follow the printed checklist** — fill in `constitution.md`'s `<<FILL:...>>` markers, stand up the 3 cmux workspaces (`scaffold/prompts/setup-cmux-workspaces.md`), start the dashboard in a side pane of main (`scaffold/prompts/run-dashboard-in-pane.md`), and run one deliberately trivial synthetic feature through all 9 gates by hand before trusting it with anything real. Full walkthrough: `docs/scaffolding-guide.md`.
 
@@ -40,7 +48,7 @@ curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/inst
 | See the whole empty-repo-to-ongoing-delivery story in one read | `docs/lifecycle-walkthrough.md` |
 | Get the dashboard running (in a cmux pane or standalone) and troubleshoot it | `docs/running-the-dashboard.md`, `scaffold/prompts/run-dashboard-in-pane.md` |
 
-## Status: v0.1.5
+## Status: v0.1.7
 
 - ✅ `factory-log/` — schema, validator, fixtures, templates (13 passing tests)
 - ✅ `constitution/` — template, structural validator, fixtures
