@@ -4,7 +4,7 @@ Canonical template repository for the Claude-only spec-driven multi-agent develo
 
 Projects scaffold from a specific tagged version of this repository (`scaffold/scaffold.sh --template-version <tag> --target ./my-project`) and never fork it — a fix belongs here, reviewed and re-tagged, not patched locally in a consuming project.
 
-## Status: v0.1.1
+## Status: v0.1.2
 
 - ✅ `factory-log/` — schema, validator, fixtures, templates (12 passing tests)
 - ✅ `constitution/` — template, structural validator, fixtures
