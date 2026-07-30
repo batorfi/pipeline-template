@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.16 — 2026-07-30
+
+**Added:**
+- `docs/manual-cmux-workspace-setup.md` — a new doc giving the raw `cmux` CLI commands for standing up the 3 core workspaces (main, design, implementation) yourself, directly in your terminal, as an alternative to pasting `docs/prompts/setup-cmux-workspaces.md`'s prompt into a Claude Code session. Same result either way: `.specify/cmux-workspaces.json`. Copied into every scaffolded project automatically (it's part of `docs/`, which `do_copy_steps` already copies wholesale — no scaffold.py change needed). Shares the same "not yet run against a live cmux instance" caveat as the prompt version, since both were written from the same CLI reference.
+- README, `docs/scaffolding-guide.md` step 4, and the "definition of ready" checklist all updated to mention this second path and the new `docs/` file count (9, was 8).
+
 ## v0.1.15 — 2026-07-30
 
 **Fixed:**
