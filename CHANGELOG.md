@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.17 — 2026-07-30
+
+**Added:**
+- `docs/manual-cmux-workspace-setup-gui.md` — a third path for standing up the 3 core cmux workspaces, this one entirely via the cmux app's own UI (`⌘N` new workspace, `⌘⇧R` rename) rather than a CLI or a pasted prompt. `.specify/cmux-workspaces.json` still needs real workspace IDs and no GUI path to view those was found in the sources checked, so this doc keeps one unavoidable `cmux list-workspaces --json` lookup at the very end — everything else is UI-only. Copied into scaffolded projects automatically via the existing `docs/` wholesale copy. README and `docs/scaffolding-guide.md` updated to list all three paths; `docs/` file count bumped from 9 to 10.
+- Labeled with the same "not yet run against a live cmux instance" caveat as the other two workspace-setup docs, plus its own open question of whether the GUI actually exposes an ID anywhere this doc missed.
+
 ## v0.1.16 — 2026-07-30
 
 **Added:**

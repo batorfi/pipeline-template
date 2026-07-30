@@ -18,7 +18,7 @@ Every artifact a new project's scaffold needs — the 11 role skills, the dashbo
 
 ## Prerequisites
 
-- **[`uv`](https://docs.astral.sh/uv/getting-started/installation/)** — required. Both `install.sh` and `scaffold/scaffold.sh` check for it up front and fail with an install link if it's missing, rather than a confusing error partway through.
+- **[`uv`](https://docs.astral.sh/uv/getting-started/installation/)** — required. Both [`install.sh`](install.sh) and [`scaffold/scaffold.sh`](scaffold/scaffold.sh) check for it up front and fail with an install link if it's missing, rather than a confusing error partway through.
 - **`git`** — recommended. If it's not present, the installer falls back to a `curl` + `tar` tarball download instead.
 - **[`cmux`](https://cmux.com)** — needed to actually *run* a scaffolded project (it's what the director and worker panes run inside), not to scaffold one.
 - **[GitHub Spec Kit](https://github.com/github/spec-kit)** (`specify` CLI) — install command and order in step 1 of Getting Started, below. `scaffold.sh` will warn and skip `specify init` if it's not installed yet, so you can scaffold first and install it before your first feature if you'd rather.
@@ -44,47 +44,47 @@ If you skip this step, `scaffold.sh` will warn and continue without it — you c
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.16 --target ./my-project
+  | bash -s -- --template-version v0.1.17 --target ./my-project
 ```
 
 *Existing project* — point `--target` at your existing repository's root instead:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.16 --target ./my-existing-repo
+  | bash -s -- --template-version v0.1.17 --target ./my-existing-repo
 ```
 
 Your existing files, git history, and `.git/` are left untouched — the scaffold only adds `.claude/skills-pipeline-roles/`, `.specify/`, `dashboard/`, `docs/`, and `specs/`. **If your project already has non-empty `dashboard/` or `docs/` directories, the scaffold refuses to run** rather than silently deleting and replacing them (this pipeline's own artifacts use those same directory names) — move your existing one aside first, or scaffold into a subdirectory instead of the project root.
 
-If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.16 --target <path>`.)
+If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.17 --target <path>`.)
 
 **3. Follow the printed checklist** — fill in `constitution.md`'s `<<FILL:...>>` markers, stand up the 3 cmux workspaces, start the dashboard in a side pane of main, and run one deliberately trivial synthetic feature through all 9 gates by hand before trusting it with anything real.
 
-The cmux-workspace step uses `docs/prompts/setup-cmux-workspaces.md` (paste its prompt into a Claude Code session running inside cmux — see "How to run a `docs/prompts/*.md` file" in `docs/scaffolding-guide.md`) or, if you'd rather run the `cmux` commands yourself, `docs/manual-cmux-workspace-setup.md`. The dashboard step similarly uses `docs/prompts/run-dashboard-in-pane.md` or the manual commands in `docs/running-the-dashboard.md`. All four files are copied into your project at scaffold time.
+The cmux-workspace step has three equivalent paths — pick whichever fits how you work: [`scaffold/prompts/setup-cmux-workspaces.md`](scaffold/prompts/setup-cmux-workspaces.md) (paste its prompt into a Claude Code session running inside cmux — copied into your scaffolded project as `docs/prompts/setup-cmux-workspaces.md`; see "How to run a `docs/prompts/*.md` file" in [`docs/scaffolding-guide.md`](docs/scaffolding-guide.md)), [`docs/manual-cmux-workspace-setup.md`](docs/manual-cmux-workspace-setup.md) (run the `cmux` CLI commands yourself), or [`docs/manual-cmux-workspace-setup-gui.md`](docs/manual-cmux-workspace-setup-gui.md) (create and name the workspaces in the cmux app's UI, with one CLI lookup at the very end to read off their IDs). The dashboard step similarly uses [`scaffold/prompts/run-dashboard-in-pane.md`](scaffold/prompts/run-dashboard-in-pane.md) (copied to `docs/prompts/run-dashboard-in-pane.md`) or the manual commands in [`docs/running-the-dashboard.md`](docs/running-the-dashboard.md). All five files are copied into your project at scaffold time.
 
 **4. Read the rest of `docs/` as you need it** — this is the map:
 
 | If you want to... | Read |
 |---|---|
-| Understand the motivation, architecture, and design reasoning in depth | `docs/introduction.md` |
-| Understand what this pipeline is, in brief | `docs/getting-started.md` |
-| See the full role/gate/tier design before running it | `docs/workflow-overview.md` |
-| Know what an open gate is actually asking of you | `docs/human-gates.md` |
-| Scaffold or sync a project | `docs/scaffolding-guide.md` |
-| Stand up the 3 cmux workspaces with a real name→ID mapping | `docs/prompts/setup-cmux-workspaces.md` (paste into a Claude Code session in cmux) or `docs/manual-cmux-workspace-setup.md` (run the `cmux` commands yourself) |
-| Fill in `constitution.md` with real values | `docs/constitution-authoring-guide.md` |
-| See the whole empty-repo-to-ongoing-delivery story in one read | `docs/lifecycle-walkthrough.md` |
-| Get the dashboard running (in a cmux pane or standalone) and troubleshoot it | `docs/running-the-dashboard.md`, `docs/prompts/run-dashboard-in-pane.md` (in your scaffolded project) |
+| Understand the motivation, architecture, and design reasoning in depth | [`docs/introduction.md`](docs/introduction.md) |
+| Understand what this pipeline is, in brief | [`docs/getting-started.md`](docs/getting-started.md) |
+| See the full role/gate/tier design before running it | [`docs/workflow-overview.md`](docs/workflow-overview.md) |
+| Know what an open gate is actually asking of you | [`docs/human-gates.md`](docs/human-gates.md) |
+| Scaffold or sync a project | [`docs/scaffolding-guide.md`](docs/scaffolding-guide.md) |
+| Stand up the 3 cmux workspaces with a real name→ID mapping | [`scaffold/prompts/setup-cmux-workspaces.md`](scaffold/prompts/setup-cmux-workspaces.md) (paste into a Claude Code session in cmux), [`docs/manual-cmux-workspace-setup.md`](docs/manual-cmux-workspace-setup.md) (run the `cmux` commands yourself), or [`docs/manual-cmux-workspace-setup-gui.md`](docs/manual-cmux-workspace-setup-gui.md) (create/name them in the cmux app's UI, one CLI lookup at the end) |
+| Fill in `constitution.md` with real values | [`docs/constitution-authoring-guide.md`](docs/constitution-authoring-guide.md) |
+| See the whole empty-repo-to-ongoing-delivery story in one read | [`docs/lifecycle-walkthrough.md`](docs/lifecycle-walkthrough.md) |
+| Get the dashboard running (in a cmux pane or standalone) and troubleshoot it | [`docs/running-the-dashboard.md`](docs/running-the-dashboard.md), [`scaffold/prompts/run-dashboard-in-pane.md`](scaffold/prompts/run-dashboard-in-pane.md) (copied to `docs/prompts/` in your scaffolded project) |
 
-## Status: v0.1.16
+## Status: v0.1.17
 
 - ✅ `factory-log/` — schema, validator, fixtures, templates (13 passing tests)
 - ✅ `constitution/` — template, structural validator, fixtures
 - ✅ `skills/` — all 11 role skills, reviewed; director skill now reads `.specify/cmux-workspaces.json` for real workspace IDs instead of assuming cmux understands workspace names
 - ✅ `dashboard/` — backend (5 endpoints, FastAPI) and frontend (4-zone vanilla JS), integration-tested, confirmed rendering in cmux's actual embedded browser
-- ✅ `docs/` — all 9 onboarding docs, including `introduction.md` (motivation, architecture, implementation principles) and `manual-cmux-workspace-setup.md` (run the cmux commands yourself, an alternative to the `docs/prompts/` paste-into-Claude-Code path)
-- ✅ `scaffold/scaffold.sh` + `install.sh` — fresh scaffold + `--sync`, tested end-to-end against a real target and a real anonymous clone: clone (git or curl+tar, no auth needed against this public repo), copy, render, `<<FILL:...>>` validation gate, idempotency refusal, sync diff-preview, drifted-file overwrite with constitution-value preservation, a fail-fast check for `uv` before either script does anything else, and — for scaffolding into an existing project — a pre-flight check that refuses to run rather than silently deleting a pre-existing non-empty `dashboard/` or `docs/`, tested against both a real conflict and a real non-conflicting existing project
-- ⚠️ `scaffold/prompts/setup-cmux-workspaces.md` and `run-dashboard-in-pane.md` — now copied into every scaffolded project as `docs/prompts/` so a developer can actually find them after `scaffold.sh` exits (previously they only existed in this template repo, unreachable from a scaffolded project). Content itself is unchanged: written from the cmux CLI reference doc, **not yet run against a live cmux instance**; the dashboard-starting commands inside the second prompt are fully verified, the cmux pane-mechanics wrapping them is not. Each prompt states this caveat and asks you to report back what actually happens.
+- ✅ [`docs/`](docs/) — all 10 onboarding docs, including [`introduction.md`](docs/introduction.md) (motivation, architecture, implementation principles), [`manual-cmux-workspace-setup.md`](docs/manual-cmux-workspace-setup.md) (run the cmux commands yourself), and [`manual-cmux-workspace-setup-gui.md`](docs/manual-cmux-workspace-setup-gui.md) (create workspaces in the cmux app's UI, one CLI lookup at the end) — three alternative paths for the same cmux-workspace setup step
+- ✅ [`scaffold/scaffold.sh`](scaffold/scaffold.sh) + [`install.sh`](install.sh) — fresh scaffold + `--sync`, tested end-to-end against a real target and a real anonymous clone: clone (git or curl+tar, no auth needed against this public repo), copy, render, `<<FILL:...>>` validation gate, idempotency refusal, sync diff-preview, drifted-file overwrite with constitution-value preservation, a fail-fast check for `uv` before either script does anything else, and — for scaffolding into an existing project — a pre-flight check that refuses to run rather than silently deleting a pre-existing non-empty `dashboard/` or `docs/`, tested against both a real conflict and a real non-conflicting existing project
+- ⚠️ [`scaffold/prompts/setup-cmux-workspaces.md`](scaffold/prompts/setup-cmux-workspaces.md) and [`run-dashboard-in-pane.md`](scaffold/prompts/run-dashboard-in-pane.md) — now copied into every scaffolded project as `docs/prompts/` so a developer can actually find them after `scaffold.sh` exits (previously they only existed in this template repo, unreachable from a scaffolded project). Content itself is unchanged: written from the cmux CLI reference doc, **not yet run against a live cmux instance**; the dashboard-starting commands inside the second prompt are fully verified, the cmux pane-mechanics wrapping them is not. Each prompt states this caveat and asks you to report back what actually happens.
 - ✅ `specify init . --integration claude`, run manually — **confirmed working against a real Spec Kit install**, twice: all 10 of Spec Kit's own skills installed correctly alongside our 11 role skills with zero naming collisions (validating the `.claude/skills-pipeline-roles/` naming choice made specifically to avoid this), and — on a second, correct run — Spec Kit's own "existing file preserved" logic confirmed it doesn't overwrite an already-filled-in `constitution.md`. The `uv tool install specify-cli` line in Getting Started step 1 is still unverified by us specifically (the confirming user already had `specify` installed by another method).
 - ✅ `specify init` run **automatically** by `scaffold.sh` — **fixed and confirmed**: it used to always fail in practice, because by the time it runs the target is already non-empty (our own scaffold populated it first), triggering an interactive "continue? [y/N]" prompt with nothing to read from, since the automated path (e.g. `curl | bash`) has no TTY attached. `scaffold.py` now feeds `y` to that prompt automatically, and a real `curl | bash` run confirmed it: all 10 Spec Kit skills installed, `.specify/` fully populated, rendered constitution preserved, no further prompts encountered.
 - ✅ Real-world lesson from that same pilot, now fixed and re-confirmed: an earlier run of `specify init` from the wrong directory (a project's parent, not the project itself) installed Spec Kit there instead of inside the target — fully recoverable (nothing pre-existing was overwritten), but avoidable. `scaffold.sh`'s printed checklist now embeds the literal target path and warns about this explicitly; the very next scaffold run, following the corrected checklist, went cleanly.
