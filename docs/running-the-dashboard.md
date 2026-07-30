@@ -2,27 +2,34 @@
 
 How to get the dashboard actually up and rendering — not just aware it exists. See `concepts/claude-only-pipeline/20260720-111924_director-dashboard-status-gates-and-run-statistics.md` and `.../20260720-140033_dashboard-runtime-stack.md` for the design behind what follows.
 
-## Starting the backend
+## Starting the dashboard (backend + frontend, one process)
 
-The backend is a small, read-only FastAPI app — it never writes to `factory-log.md`, `tasks.md`, or `constitution.md`, never spawns a pane, makes zero outbound network calls.
+The backend is a small, read-only FastAPI app — it never writes to `factory-log.md`, `tasks.md`, or `constitution.md`, never spawns a pane, makes zero outbound network calls. The frontend's JS calls `fetch('/log')` etc. with **relative, same-origin paths** — it has no way to reach an API running on a different origin/port, so the backend and frontend must be served from the same process, not two separate servers on two separate ports. Running them as two `python -m http.server` / `uvicorn` processes on different ports will *look* like it started fine and then silently fail every API call.
 
 ```bash
 cd dashboard
-PIPELINE_CONFIG=config.json uv run --with fastapi --with uvicorn --with pyyaml \
-  uvicorn server.app:create_app --factory --reload
+PIPELINE_CONFIG=config.json uv run --with fastapi --with uvicorn --with pyyaml python3 -c "
+from server.app import create_app
+from fastapi.staticfiles import StaticFiles
+app = create_app(config_path='config.json')
+app.mount('/', StaticFiles(directory='.', html=True), name='static')
+import uvicorn
+uvicorn.run(app, host='127.0.0.1', port=8000)
+"
 ```
 
-Confirm it's serving with a quick smoke test against the log-tail endpoint:
+Confirm it's serving — both the API and the static frontend, from the same port:
 
 ```bash
-curl http://localhost:8000/log
+curl http://localhost:8000/log          # API — should return {"entries": [...], "errors": [...]}
+curl -I http://localhost:8000/          # frontend — should return 200, Content-Type: text/html
 ```
 
-You should get back `{"entries": [...], "errors": [...]}` — an empty `entries` array on a fresh scaffold is expected and correct (the near-empty state), not a bug.
+An empty `entries` array on a fresh scaffold is expected and correct (the near-empty state), not a bug.
 
 ## Opening the frontend
 
-Point cmux's embedded browser at `dashboard/index.html`, served from the same directory (a plain static file server works — `python -m http.server` from `dashboard/`, or point the browser directly if `file://` fetches work in your cmux build; this isn't guaranteed across cmux versions, so test it once and note the result).
+Point cmux's embedded browser at `http://localhost:8000/` — **not** `dashboard/index.html` directly via `file://`. Even if `file://` fetches happen to work in a given cmux build (unconfirmed, see the troubleshooting note below), the frontend still needs a same-origin API to call; serving both from the one process above is the only path guaranteed to work regardless of cmux's `file://` behavior.
 
 On a fresh, near-empty project you should see: the attention band reading "Nothing needs you" in its calm, muted idle styling; empty-but-designed states in the other three zones (not blank space) — "No activity logged yet," "No tasks yet," "No cost data yet." That's the correct fresh-scaffold appearance, not a rendering failure.
 
@@ -43,7 +50,9 @@ On a fresh, near-empty project you should see: the attention band reading "Nothi
 
 ## Troubleshooting
 
-- **Frontend shows nothing, or every zone errors.** The backend isn't running, or `PIPELINE_CONFIG` wasn't set when it started. Re-check the smoke-test curl above.
+- **`GET /` returns `{"detail":"Not Found"}`.** You started the backend without the `StaticFiles` mount (i.e., the plain `uvicorn server.app:create_app --factory` form from an earlier draft of this doc) — that process only serves the API, not the frontend. Use the single-process command above, which mounts both from the same app.
+- **`/log` and `/config` return empty/not-found even though the fixture files genuinely exist.** This was a real bug (fixed): `DashboardConfig.load()` computed `project_root` from `config_json_path.parent.parent`, but if `PIPELINE_CONFIG` is a bare filename with no directory component (e.g. `PIPELINE_CONFIG=config.json`, which is the normal way to run this), `Path("config.json").parent.parent` stays `"."` — pathlib's `.parent` is purely lexical and a bare `"."` has no syntactic "above" itself, so `project_root` silently collapsed to the process's `cwd` instead of the real project root. Fixed by resolving the config path to absolute *before* computing `.parent.parent`. If you're running a version older than this fix, update `dashboard/server/app_config.py` or re-sync from a newer template tag.
+- **Frontend shows nothing, or every zone errors, and the fix above doesn't apply.** The backend isn't running, or `PIPELINE_CONFIG` wasn't set when it started. Re-check the smoke-test curls above.
 - **Everything works except live pane status (`/panes` always returns `panes_unavailable: true`).** Either `cmux` isn't reachable from wherever the backend is running, or `CMUX_SOCKET_PATH` needs to be set explicitly in `config.json`. This is a separate endpoint from everything else — the rest of the dashboard keeps working normally when this one degrades.
 - **Dashboard shows stale data after renaming or moving the project.** `config.json`'s paths are relative to where it was generated — re-run `scaffold.sh --sync` or regenerate the config manually if the project has moved.
 - **`/panes` response fields look wrong or empty even though `panes_unavailable` is `false`.** The exact JSON shape cmux's `list-panels`/`list-pane-surfaces` return hasn't been fully verified across all cmux versions — see `dashboard/server/NOTES.md` for the known caveat and where to adjust the parsing if your cmux version's output differs.

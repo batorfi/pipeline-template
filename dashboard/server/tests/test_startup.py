@@ -2,9 +2,12 @@
 fresh-scaffold near-empty state — tasks.md absent, factory-log.md header-only.
 """
 
+import os
+
 from fastapi.testclient import TestClient
 
 from dashboard.server.app import create_app
+from dashboard.server.app_config import DashboardConfig
 
 
 def test_near_empty_state_all_endpoints_succeed(near_empty_config_file):
@@ -27,3 +30,22 @@ def test_near_empty_state_all_endpoints_succeed(near_empty_config_file):
     # they still respond cleanly rather than erroring on an empty project.
     assert client.get("/config").status_code == 200
     assert client.get("/panes").status_code == 200
+
+
+def test_bare_relative_config_filename_resolves_correctly(dashboard_config_file, pipeline_root):
+    """Regression test: PIPELINE_CONFIG=config.json (a bare filename, no
+    directory component) must resolve project_root correctly. Path("config.json")
+    .parent.parent stays "." without first calling .resolve() — this exact bug
+    shipped and silently broke real usage (project_root collapsed to the cwd
+    the process happened to start in, e.g. dashboard/ instead of the project
+    root), even though every other test used an already-absolute config path
+    and never exercised it."""
+    original_cwd = os.getcwd()
+    try:
+        os.chdir(dashboard_config_file.parent)  # simulate `cd dashboard && ... PIPELINE_CONFIG=config.json`
+        config = DashboardConfig.load(dashboard_config_file.name)  # bare filename, no directory
+        assert config.project_root == pipeline_root.resolve()
+        assert config.factory_log_path.exists()
+        assert config.constitution_path.exists()
+    finally:
+        os.chdir(original_cwd)

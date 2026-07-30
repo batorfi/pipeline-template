@@ -23,7 +23,13 @@ class DashboardConfig:
 
     @classmethod
     def load(cls, config_json_path: str | Path, project_root: str | Path | None = None) -> "DashboardConfig":
-        config_json_path = Path(config_json_path)
+        # Resolve to an absolute path BEFORE computing .parent.parent — pathlib's
+        # .parent is purely lexical, so a bare relative filename like "config.json"
+        # (no directory component) has parent "." whose own .parent is ALSO "."
+        # (there's no syntactic "above" a lexical "."), silently collapsing
+        # project_root to the wrong directory. .resolve() first makes .parent
+        # actually walk up real filesystem directories.
+        config_json_path = Path(config_json_path).resolve()
         with open(config_json_path, encoding="utf-8") as fh:
             data = json.load(fh)
 
@@ -31,7 +37,7 @@ class DashboardConfig:
             if required not in data:
                 raise ValueError(f"dashboard config missing required field: {required}")
 
-        root = Path(project_root) if project_root else config_json_path.parent.parent
+        root = Path(project_root).resolve() if project_root else config_json_path.parent.parent
 
         tasks_path = root / data["tasks_path"]
         return cls(

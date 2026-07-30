@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.2 — 2026-07-30
+
+**Fixed:**
+- **`dashboard/server/app_config.py`: project-root resolution silently broke on the normal invocation.** `DashboardConfig.load()` computed `project_root` as `config_json_path.parent.parent`, which only worked when the config path was already absolute. The real, documented invocation (`PIPELINE_CONFIG=config.json`, a bare filename) hit a pathlib quirk — `Path(".").parent` is also `Path(".")`, since `.parent` is lexical, not filesystem-aware — so `project_root` silently collapsed to the server's `cwd` instead of the real project root. Every downstream path (`factory_log_path`, `constitution_path`) then pointed at files that don't exist, which `/log`/`/tasks` treat as valid empty state by design — so the failure was silent: no exception, no error, just an API that always looked like a freshly-scaffolded empty project no matter what was actually in the log. Found only by running a real server and hitting it with real `curl` requests — every existing test used an already-absolute config path and never exercised this. Fixed by resolving the config path to absolute before computing `.parent.parent`; added a regression test that changes the test process's `cwd` and passes a bare filename.
+- **`docs/running-the-dashboard.md`: the documented two-process approach (separate backend and static-file-server processes) never actually worked.** The frontend's `fetch()` calls are relative, same-origin paths — they have no way to reach an API on a different port. Rewritten to the single-process form (FastAPI serving both the API and the static frontend via a `StaticFiles` mount), which is what was actually verified working end-to-end.
+
 ## v0.1.1 — 2026-07-30
 
 **Added:**
