@@ -20,24 +20,36 @@ Every artifact a new project's scaffold needs — the 11 role skills, the dashbo
 
 - **[`uv`](https://docs.astral.sh/uv/getting-started/installation/)** — required. Both `install.sh` and `scaffold/scaffold.sh` check for it up front and fail with an install link if it's missing, rather than a confusing error partway through.
 - **`git`** — recommended. If it's not present, the installer falls back to a `curl` + `tar` tarball download instead.
-- **[`cmux`](https://cmux.com)** and **[GitHub Spec Kit](https://github.com/github/spec-kit)** (`specify` CLI) — needed to actually *run* a scaffolded project, not to scaffold one. `scaffold.sh` will warn and skip `specify init` if it's not installed yet, so you can scaffold first and install these before your first feature.
+- **[`cmux`](https://cmux.com)** — needed to actually *run* a scaffolded project (it's what the director and worker panes run inside), not to scaffold one.
+- **[GitHub Spec Kit](https://github.com/github/spec-kit)** (`specify` CLI) — install command and order in step 1 of Getting Started, below. `scaffold.sh` will warn and skip `specify init` if it's not installed yet, so you can scaffold first and install it before your first feature if you'd rather.
 
 No GitHub account or auth of any kind is needed — this repository is public.
 
 ## Getting started
 
-**1. Scaffold a new project** — no local clone required:
+**1. Install GitHub Spec Kit's `specify` CLI** — the scaffold step below will use it automatically if it's already on `PATH`, so install it first if you can:
+
+```bash
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+specify --version   # confirm it installed correctly
+```
+
+*(This install command has not been run and verified as part of this repository's own tested claims — see the caveat in the Status section below. If it doesn't work, check [GitHub Spec Kit's own install docs](https://github.com/github/spec-kit) directly.)*
+
+If you skip this step, `scaffold.sh` will warn and continue without it — you can install it later and run `specify init . --integration claude` by hand inside the project folder once it's scaffolded (step 2 creates that folder for you; no separate `mkdir` is needed).
+
+**2. Scaffold a new project** — this creates `./my-project` itself (the target directory doesn't need to exist beforehand), and, if `specify` from step 1 is on `PATH`, runs `specify init . --integration claude` inside it automatically:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.8 --target ./my-project
+  | bash -s -- --template-version v0.1.9 --target ./my-project
 ```
 
-(Or, from an existing local clone: `scaffold/scaffold.sh --template-version v0.1.8 --target ./my-project`.)
+(Or, from an existing local clone: `scaffold/scaffold.sh --template-version v0.1.9 --target ./my-project`.)
 
-**2. Follow the printed checklist** — fill in `constitution.md`'s `<<FILL:...>>` markers, stand up the 3 cmux workspaces (`scaffold/prompts/setup-cmux-workspaces.md`), start the dashboard in a side pane of main (`scaffold/prompts/run-dashboard-in-pane.md`), and run one deliberately trivial synthetic feature through all 9 gates by hand before trusting it with anything real. Full walkthrough: `docs/scaffolding-guide.md`.
+**3. Follow the printed checklist** — fill in `constitution.md`'s `<<FILL:...>>` markers, stand up the 3 cmux workspaces (`scaffold/prompts/setup-cmux-workspaces.md`), start the dashboard in a side pane of main (`scaffold/prompts/run-dashboard-in-pane.md`), and run one deliberately trivial synthetic feature through all 9 gates by hand before trusting it with anything real. Full walkthrough: `docs/scaffolding-guide.md`.
 
-**3. Read the rest of `docs/` as you need it** — this is the map:
+**4. Read the rest of `docs/` as you need it** — this is the map:
 
 | If you want to... | Read |
 |---|---|
@@ -51,7 +63,7 @@ curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/inst
 | See the whole empty-repo-to-ongoing-delivery story in one read | `docs/lifecycle-walkthrough.md` |
 | Get the dashboard running (in a cmux pane or standalone) and troubleshoot it | `docs/running-the-dashboard.md`, `scaffold/prompts/run-dashboard-in-pane.md` |
 
-## Status: v0.1.8
+## Status: v0.1.9
 
 - ✅ `factory-log/` — schema, validator, fixtures, templates (13 passing tests)
 - ✅ `constitution/` — template, structural validator, fixtures
@@ -60,5 +72,6 @@ curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/inst
 - ✅ `docs/` — all 8 onboarding docs, including `introduction.md` (motivation, architecture, implementation principles)
 - ✅ `scaffold/scaffold.sh` + `install.sh` — fresh scaffold + `--sync`, tested end-to-end against a real target and a real anonymous clone: clone (git or curl+tar, no auth needed against this public repo), copy, render, `<<FILL:...>>` validation gate, idempotency refusal, sync diff-preview, drifted-file overwrite with constitution-value preservation, and a fail-fast check for `uv` before either script does anything else
 - ⚠️ `scaffold/prompts/setup-cmux-workspaces.md` and `run-dashboard-in-pane.md` — written from the cmux CLI reference doc, **not yet run against a live cmux instance**; the dashboard-starting commands inside the second prompt are fully verified, the cmux pane-mechanics wrapping them is not. Each prompt states this caveat and asks you to report back what actually happens.
+- ⚠️ The `specify-cli` install command in Getting Started step 1 is written from general knowledge of GitHub Spec Kit's install method, **not verified against a real install in this repository's own testing** — `specify` was never available in the environment this repository was built and tested in. If it's wrong, check [github.com/github/spec-kit](https://github.com/github/spec-kit) directly and let this repo know so the command can be corrected.
 
 See the source project's `docs/implementation-plan.md` / `implementation-specs.md` / `implementation-tasks.md` for the full build plan this repository is being assembled against — not part of this repo, but the design record behind it.

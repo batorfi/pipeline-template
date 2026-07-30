@@ -2,6 +2,17 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.9 — 2026-07-30
+
+**Added:**
+- `README.md` Getting Started now has an explicit step 1: installing GitHub Spec Kit's `specify` CLI (`uv tool install specify-cli --from git+https://github.com/github/spec-kit.git`), before scaffolding — since `scaffold.sh` uses it automatically if present. Clarified that scaffolding itself creates the target project folder; no separate `mkdir` step is needed.
+
+**Changed:**
+- Prerequisites section: split the `cmux` and Spec Kit bullets apart and pointed the Spec Kit one at the new Getting Started step instead of duplicating install instructions in two places.
+
+**Known gap, stated honestly:**
+- The `specify-cli` install command has not been run and verified as part of this repository's own testing — `specify` was never available in the build/test environment. Flagged in both the README step and the Status section; check GitHub Spec Kit's own docs if it doesn't work as written.
+
 ## v0.1.8 — 2026-07-30
 
 **Added:**
