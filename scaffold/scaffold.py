@@ -185,9 +185,29 @@ def run_specify_init(target: Path) -> bool:
         )
         return False
 
+    # By the time this runs, the target is already non-empty — scaffold.py's
+    # own copy steps have already populated it (skills, dashboard, docs,
+    # specs, .specify/). `specify init` detects that and asks an interactive
+    # "Current directory is not empty ... continue? [y/N]" question. When
+    # scaffold.sh is run non-interactively (e.g. via `curl | bash`, which has
+    # no TTY attached), that prompt has nothing to read from stdin and the
+    # process fails immediately with an unhelpful, often-empty error —
+    # exactly the failure this was originally written to just warn-and-skip
+    # on. Feeding "y" via `input=` answers that one prompt directly, so the
+    # automated path can actually succeed instead of always needing the
+    # manual fallback.
+    #
+    # Not yet verified against a real `specify` install in this repo's own
+    # testing (no `specify` binary was available in the environment this was
+    # built and tested in) — if `specify init` still prompts for something
+    # else beyond the non-empty-directory confirmation (e.g. an interactive
+    # coding-agent-integration menu not fully bypassed by --integration
+    # claude), this single "y\n" may not be sufficient. Report back if it
+    # isn't.
     result = subprocess.run(
         ["specify", "init", ".", "--integration", "claude"],
         cwd=target,
+        input="y\n",
         capture_output=True,
         text=True,
     )
