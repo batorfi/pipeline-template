@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pipeline Dashboard</title>
+  <link rel="stylesheet" href="assets/theme.css" />
+  <link rel="stylesheet" href="assets/layout.css" />
+</head>
+<body>
+  <!-- Zone 1: Attention band — always visible, never scrolled past. FE-001, FE-002, FE-003. -->
+  <div id="attention-band" class="attention-band attention-band--idle" role="status" aria-live="polite">
+    <p class="attention-band__text">Loading…</p>
+  </div>
+
+  <main class="dashboard-main">
+    <!-- Cross-feature summary strip + feature switcher. FE-031. -->
+    <section id="feature-switcher" class="feature-switcher" aria-label="Feature switcher"></section>
+
+    <!-- Zone 2: live pane view -->
+    <section id="live-panes" class="live-panes" aria-label="Active panes">
+      <h2 class="section-heading">Running now</h2>
+      <div id="live-panes-list" class="live-panes__list"></div>
+    </section>
+
+    <!-- Zone 3: step-report feed. FE-010. -->
+    <section id="step-reports" class="step-reports" aria-label="Step reports">
+      <h2 class="section-heading">Step reports</h2>
+      <div id="step-reports-list" class="step-reports__list"></div>
+    </section>
+
+    <!-- Zone 4: task board + run statistics. FE-020, FE-030. -->
+    <section id="task-board" class="task-board" aria-label="Task board">
+      <h2 class="section-heading">Task board</h2>
+      <div id="task-board-list" class="task-board__list"></div>
+    </section>
+
+    <section id="totals-panel" class="totals-panel" aria-label="Run statistics and totals"></section>
+  </main>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>

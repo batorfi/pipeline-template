@@ -1,0 +1,15 @@
+"""GET /tasks — implements BE-010."""
+
+from __future__ import annotations
+
+from fastapi import APIRouter, Request
+
+from ..readers.tasks_reader import read_tasks
+
+router = APIRouter()
+
+
+@router.get("/tasks")
+def get_tasks(request: Request):
+    config = request.app.state.config
+    return read_tasks(config.tasks_path)

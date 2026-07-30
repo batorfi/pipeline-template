@@ -1,0 +1,154 @@
+/* Typography and color system — implements FE-051.
+   No CDN fonts: the interface stack is the OS's own system font (zero
+   network fetch, not merely "self-hosted"); the data stack is a system
+   monospace font, per the design system's rule that data (IDs, paths,
+   tiers, costs, timestamps) gets a visually distinct face from prose. */
+
+:root {
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-data: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Neutral base — light theme default */
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f6f7f8;
+  --color-border: #e0e2e5;
+  --color-text: #1a1d21;
+  --color-text-muted: #6b7280;
+
+  /* Fixed 4-state status vocabulary — used identically everywhere it appears.
+     Never repurpose these for anything other than their named meaning. */
+  --status-attention-bg: #fff4e5;
+  --status-attention-border: #f59e0b;
+  --status-attention-text: #92400e;
+
+  --status-healthy-bg: #e8f7ee;
+  --status-healthy-border: #22c55e;
+  --status-healthy-text: #14532d;
+
+  --status-caution-bg: #fff8e1;
+  --status-caution-border: #eab308;
+  --status-caution-text: #713f12;
+
+  --status-stopped-bg: #fdecec;
+  --status-stopped-border: #ef4444;
+  --status-stopped-text: #7f1d1d;
+
+  /* Tier badges — distinct from status colors, restrained (not full hues) */
+  --tier-opus-bg: #efe6fb;
+  --tier-opus-text: #4c1d95;
+  --tier-sonnet-bg: #e6f0fb;
+  --tier-sonnet-text: #1e3a8a;
+  --tier-haiku-bg: #eef2f5;
+  --tier-haiku-text: #374151;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #16181c;
+    --color-bg-subtle: #1e2126;
+    --color-border: #2c2f36;
+    --color-text: #e8eaed;
+    --color-text-muted: #9aa1ab;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #16181c;
+  --color-bg-subtle: #1e2126;
+  --color-border: #2c2f36;
+  --color-text: #e8eaed;
+  --color-text-muted: #9aa1ab;
+}
+
+:root[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f6f7f8;
+  --color-border: #e0e2e5;
+  --color-text: #1a1d21;
+  --color-text-muted: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.section-heading {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 var(--space-2) 0;
+}
+
+/* Data typography: task IDs, file paths, tiers, costs, timestamps */
+.data-mono {
+  font-family: var(--font-data);
+  font-size: 0.9em;
+}
+
+/* Status badges — the one place the 4-state vocabulary is directly styled */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.status-badge--attention {
+  background: var(--status-attention-bg);
+  border-color: var(--status-attention-border);
+  color: var(--status-attention-text);
+}
+.status-badge--healthy {
+  background: var(--status-healthy-bg);
+  border-color: var(--status-healthy-border);
+  color: var(--status-healthy-text);
+}
+.status-badge--caution {
+  background: var(--status-caution-bg);
+  border-color: var(--status-caution-border);
+  color: var(--status-caution-text);
+}
+.status-badge--stopped {
+  background: var(--status-stopped-bg);
+  border-color: var(--status-stopped-border);
+  color: var(--status-stopped-text);
+}
+
+/* Tier badges — distinct, restrained, identical everywhere a tier is shown */
+.tier-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--font-data);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.tier-badge--opus {
+  background: var(--tier-opus-bg);
+  color: var(--tier-opus-text);
+}
+.tier-badge--sonnet {
+  background: var(--tier-sonnet-bg);
+  color: var(--tier-sonnet-text);
+}
+.tier-badge--haiku {
+  background: var(--tier-haiku-bg);
+  color: var(--tier-haiku-text);
+}

@@ -1,0 +1,236 @@
+/* Layout and grid — implements FE-001.
+   Single-column, priority-ordered — never an equal-weight widget grid.
+   The attention band is the one element allowed to break the grid. */
+
+.attention-band {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+/* Idle: calm, muted — must never compete visually with the gate-open state. */
+.attention-band--idle {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+}
+
+/* Gate-open: unmissable. */
+.attention-band--gate-open {
+  background: var(--status-attention-bg);
+  border-bottom-color: var(--status-attention-border);
+  color: var(--status-attention-text);
+}
+
+.attention-band__text {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.attention-band__link {
+  display: inline-block;
+  margin-top: var(--space-1);
+  font-weight: 600;
+  color: inherit;
+}
+
+.attention-band__other-gates {
+  margin-top: var(--space-1);
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.dashboard-main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3) var(--space-5) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.feature-switcher {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.feature-switcher__button {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+
+.feature-switcher__button--active {
+  border-color: var(--color-text);
+  font-weight: 600;
+}
+
+.live-panes__list,
+.step-reports__list,
+.task-board__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Cards — the base unit for discrete, scannable content. */
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: var(--space-3);
+  background: var(--color-bg);
+}
+
+.card--muted {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.card__title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.card__body {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.card__summary {
+  margin: var(--space-2) 0 0 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  max-width: 68ch; /* readable prose line length, per the design system's typography rule */
+}
+
+/* Step-report loop-collapsing (FE-010) */
+.step-reports__loop-group summary {
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: var(--space-1) 0;
+}
+
+/* Task board phase grouping (FE-020) */
+.task-board__phase {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.task-board__phase-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-subtle);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.task-board__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.task-board__table th,
+.task-board__table td {
+  text-align: left;
+  padding: var(--space-1) var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.task-board__table td.data-mono {
+  text-align: right;
+}
+
+/* Totals panel (FE-030) */
+.totals-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+
+.totals-panel__figure {
+  font-family: var(--font-data);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.totals-panel__label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.totals-panel__bar-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-bg-subtle);
+  overflow: hidden;
+  margin-top: var(--space-1);
+}
+
+.totals-panel__bar-fill {
+  height: 100%;
+  background: var(--status-healthy-border);
+  transition: width 300ms ease, background-color 300ms ease;
+}
+
+.totals-panel__bar-fill--over {
+  background: var(--status-attention-border);
+}
+
+.totals-panel__figure-block {
+  padding: var(--space-2) 0;
+}
+
+.totals-panel__budget-trend {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Empty states (FE-040) — designed, not blank */
+.empty-state {
+  text-align: center;
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Motion: minimal, purposeful only — attention band transitions above,
+   and a soft fade for content that replaces itself on each poll cycle. */
+.poll-updated {
+  animation: poll-fade 400ms ease;
+}
+@keyframes poll-fade {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .dashboard-main {
+    padding: var(--space-3) var(--space-2) var(--space-4) var(--space-2);
+  }
+}
