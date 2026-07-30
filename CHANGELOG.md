@@ -2,6 +2,16 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.12 — 2026-07-30
+
+**Fixed:**
+- `install.sh`'s `git clone` step printed raw git output straight to the terminal on every run — `Cloning into...`, `warning: refs/tags/<tag> <sha> is not a commit!` (expected for annotated tags, not actionable), and a full detached-HEAD advice block. None of it was ever actionable on success. Now captured to a log file and only shown in full if the clone actually fails; verified both against a clean success (silent) and a real failure (bad tag — complete diagnostic still shown).
+- Cleaned up a duplicated Status-section bullet in `README.md` (the cmux-prompts caveat had been accidentally listed twice).
+
+**Confirmed (second real pilot run):**
+- Following the corrected checklist from `v0.1.11` (literal `cd` path, explicit warning), the same user's next scaffold attempt ran `specify init` from the correct directory and completed cleanly.
+- Spec Kit's own `specify init` independently detected the already-filled-in `constitution.md` and reported "existing file preserved" — a second layer of protection beyond this repo's own re-scaffold refusal, confirmed working in practice.
+
 ## v0.1.11 — 2026-07-30
 
 Real-world validation from a user's first actual pilot scaffold: `specify init . --integration claude` confirmed working end to end (all 10 of Spec Kit's own skills installed correctly, zero collision with our 11 role skills — the `.claude/skills-pipeline-roles/` naming choice paid off exactly as intended). Also surfaced a recoverable-but-avoidable mistake and two doc inaccuracies, all fixed here.

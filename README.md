@@ -44,19 +44,19 @@ If you skip this step, `scaffold.sh` will warn and continue without it — you c
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.11 --target ./my-project
+  | bash -s -- --template-version v0.1.12 --target ./my-project
 ```
 
 *Existing project* — point `--target` at your existing repository's root instead:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.11 --target ./my-existing-repo
+  | bash -s -- --template-version v0.1.12 --target ./my-existing-repo
 ```
 
 Your existing files, git history, and `.git/` are left untouched — the scaffold only adds `.claude/skills-pipeline-roles/`, `.specify/`, `dashboard/`, `docs/`, and `specs/`. **If your project already has non-empty `dashboard/` or `docs/` directories, the scaffold refuses to run** rather than silently deleting and replacing them (this pipeline's own artifacts use those same directory names) — move your existing one aside first, or scaffold into a subdirectory instead of the project root.
 
-If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.11 --target <path>`.)
+If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.12 --target <path>`.)
 
 **3. Follow the printed checklist** — fill in `constitution.md`'s `<<FILL:...>>` markers, stand up the 3 cmux workspaces (`scaffold/prompts/setup-cmux-workspaces.md`), start the dashboard in a side pane of main (`scaffold/prompts/run-dashboard-in-pane.md`), and run one deliberately trivial synthetic feature through all 9 gates by hand before trusting it with anything real. Full walkthrough: `docs/scaffolding-guide.md`.
 
@@ -74,7 +74,7 @@ If `specify` from step 1 is on `PATH`, either form runs `specify init . --integr
 | See the whole empty-repo-to-ongoing-delivery story in one read | `docs/lifecycle-walkthrough.md` |
 | Get the dashboard running (in a cmux pane or standalone) and troubleshoot it | `docs/running-the-dashboard.md`, `scaffold/prompts/run-dashboard-in-pane.md` |
 
-## Status: v0.1.11
+## Status: v0.1.12
 
 - ✅ `factory-log/` — schema, validator, fixtures, templates (13 passing tests)
 - ✅ `constitution/` — template, structural validator, fixtures
@@ -83,8 +83,8 @@ If `specify` from step 1 is on `PATH`, either form runs `specify init . --integr
 - ✅ `docs/` — all 8 onboarding docs, including `introduction.md` (motivation, architecture, implementation principles)
 - ✅ `scaffold/scaffold.sh` + `install.sh` — fresh scaffold + `--sync`, tested end-to-end against a real target and a real anonymous clone: clone (git or curl+tar, no auth needed against this public repo), copy, render, `<<FILL:...>>` validation gate, idempotency refusal, sync diff-preview, drifted-file overwrite with constitution-value preservation, a fail-fast check for `uv` before either script does anything else, and — for scaffolding into an existing project — a pre-flight check that refuses to run rather than silently deleting a pre-existing non-empty `dashboard/` or `docs/`, tested against both a real conflict and a real non-conflicting existing project
 - ⚠️ `scaffold/prompts/setup-cmux-workspaces.md` and `run-dashboard-in-pane.md` — written from the cmux CLI reference doc, **not yet run against a live cmux instance**; the dashboard-starting commands inside the second prompt are fully verified, the cmux pane-mechanics wrapping them is not. Each prompt states this caveat and asks you to report back what actually happens.
-- ✅ `specify init . --integration claude` — **confirmed working against a real Spec Kit install** (a user ran it inside a real scaffolded project, all 10 of Spec Kit's own skills installed correctly alongside our 11 role skills with zero naming collisions — validating the `.claude/skills-pipeline-roles/` naming choice made specifically to avoid this). The `uv tool install specify-cli` line in Getting Started step 1 is still unverified by us specifically (the confirming user already had `specify` installed by another method).
-- ⚠️ Real-world lesson from that same session: running `specify init` from the wrong directory (a project's parent, not the project itself) installs Spec Kit there instead — fully recoverable (nothing pre-existing gets overwritten, only new `.claude/`/`.specify/` directories are created) but avoidable. `scaffold.sh`'s printed checklist now embeds the literal target path and warns about this explicitly, since it happened for real once already.
-- ⚠️ `scaffold/prompts/setup-cmux-workspaces.md` and `run-dashboard-in-pane.md` — written from the cmux CLI reference doc, **not yet run against a live cmux instance**; the dashboard-starting commands inside the second prompt are fully verified, the cmux pane-mechanics wrapping them is not. Each prompt states this caveat and asks you to report back what actually happens.
+- ✅ `specify init . --integration claude` — **confirmed working against a real Spec Kit install**, twice: all 10 of Spec Kit's own skills installed correctly alongside our 11 role skills with zero naming collisions (validating the `.claude/skills-pipeline-roles/` naming choice made specifically to avoid this), and — on a second, correct run — Spec Kit's own "existing file preserved" logic confirmed it doesn't overwrite an already-filled-in `constitution.md`. The `uv tool install specify-cli` line in Getting Started step 1 is still unverified by us specifically (the confirming user already had `specify` installed by another method).
+- ✅ Real-world lesson from that same pilot, now fixed and re-confirmed: an earlier run of `specify init` from the wrong directory (a project's parent, not the project itself) installed Spec Kit there instead of inside the target — fully recoverable (nothing pre-existing was overwritten), but avoidable. `scaffold.sh`'s printed checklist now embeds the literal target path and warns about this explicitly; the very next scaffold run, following the corrected checklist, went cleanly.
+- ✅ `install.sh`'s git output — **fixed and verified**: cloning an annotated release tag used to print `git`'s own noise (`Cloning into...`, `warning: refs/tags/... is not a commit!`, a detached-HEAD advice block) straight to the terminal on every run. Now captured silently and only shown in full if the clone actually fails, verified against both a clean success (no output at all) and a real failure (bad tag — full diagnostic output shown).
 
 See the source project's `docs/implementation-plan.md` / `implementation-specs.md` / `implementation-tasks.md` for the full build plan this repository is being assembled against — not part of this repo, but the design record behind it.

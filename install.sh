@@ -3,7 +3,7 @@
 # without cloning the repo yourself first:
 #
 #   curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-#     | bash -s -- --template-version v0.1.4 --target ./my-project
+#     | bash -s -- --template-version v0.1.11 --target ./my-project
 #
 # All arguments after `--` are passed straight through to scaffold/scaffold.sh
 # (including --sync). This script's only job is: get a copy of the template
@@ -47,7 +47,17 @@ cleanup() { rm -rf "$WORKDIR"; }
 trap cleanup EXIT
 
 if command -v git >/dev/null 2>&1; then
-  git clone --branch "$TEMPLATE_VERSION" --depth 1 "$TEMPLATE_REPO_URL" "$WORKDIR/repo" >&2
+  # Captured, not streamed to the terminal: a shallow clone of an annotated
+  # tag always prints "warning: ... is not a commit!", "Note: switching to
+  # '<hash>'", and the detached-HEAD advice block -- all normal, all noise,
+  # none of it actionable. On failure the captured log is dumped in full so
+  # nothing diagnostic is lost; on success it's discarded.
+  if ! git clone --quiet --branch "$TEMPLATE_VERSION" --depth 1 \
+      "$TEMPLATE_REPO_URL" "$WORKDIR/repo" >"$WORKDIR/git-clone.log" 2>&1; then
+    echo "ERROR: git clone of $TEMPLATE_REPO_URL @ $TEMPLATE_VERSION failed:" >&2
+    cat "$WORKDIR/git-clone.log" >&2
+    exit 1
+  fi
 elif command -v curl >/dev/null 2>&1; then
   # No git available: fall back to downloading the tagged tarball directly
   # from GitHub's archive endpoint — still works against a public repo with
