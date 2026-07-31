@@ -138,10 +138,10 @@ def do_copy_steps(clone_dir: Path, target: Path) -> None:
 
     copy_tree_atomic(clone_dir / "docs", target / "docs")
 
-    # The setup-cmux-workspaces / run-dashboard-in-pane prompts live only in
-    # this template repo's own scaffold/prompts/ — without copying them into
-    # the scaffolded project, a developer following the printed checklist has
-    # nowhere to actually find them after scaffold.sh exits.
+    # The run-dashboard-in-pane prompt lives only in this template repo's own
+    # scaffold/prompts/ — without copying it into the scaffolded project, a
+    # developer following the printed checklist has nowhere to actually find
+    # it after scaffold.sh exits.
     copy_tree_atomic(clone_dir / "scaffold" / "prompts", target / "docs" / "prompts")
 
     # dashboard/server/readers/_factory_log_validator.py loads
@@ -324,8 +324,8 @@ never from its parent directory:
   1. Fill in every <<FILL:...>> marker in .specify/memory/constitution.md
      {'(none remain)' if ready else '(see the list above — scaffold is NOT ready until these are resolved)'}
   2. Stand up the 3 core cmux workspaces (main, design, implementation) — see
-     docs/prompts/setup-cmux-workspaces.md (paste its prompt into a Claude
-     Code session running inside cmux, in your intended main workspace).
+     docs/manual-cmux-workspace-setup.md (run the cmux commands yourself;
+     includes a naming convention so the cmux sidebar reads clearly).
   3. Start the dashboard backend and confirm the frontend renders — see
      docs/prompts/run-dashboard-in-pane.md and docs/running-the-dashboard.md.
   4. Run one deliberately trivial synthetic feature through all 9 gates by

@@ -1,6 +1,6 @@
 # Prompt: run the dashboard in a side pane of the main workspace
 
-Paste this into the Claude Code session already running in your **main** workspace (the same one that ran `setup-cmux-workspaces.md`, and where the director will live). This implements scaffold step 3 / T069 — "start the dashboard backend and confirm the frontend renders."
+Paste this into the Claude Code session already running in your **main** workspace (the same workspace named per `docs/manual-cmux-workspace-setup.md`, where the director will live). This implements scaffold step 3 / T069 — "start the dashboard backend and confirm the frontend renders."
 
 Per the pipeline concept, the main workspace holds exactly two things: the director pane and the dashboard, side by side, and nothing else is ever spawned into it. This prompt creates that second pane and starts the dashboard in it.
 
@@ -64,7 +64,7 @@ and the dashboard, per the pipeline design, nothing more.
 
 ## Caveat, stated plainly
 
-Like `setup-cmux-workspaces.md`, this prompt was written from `docs/cmux/cli-reference.md` alone for the `cmux new-split`/`list-panels` portion — **not run against a live cmux instance** as part of this template's own build. The dashboard-starting command itself (steps 3-5) *is* fully verified — it's the exact single-process form confirmed working end to end in `dashboard/NOTES.md`. What's unconfirmed is only the cmux pane-mechanics wrapper around it: whether `cmux new-split` needs an explicit `--workspace` flag to target a non-current workspace, and whether the newly created pane is reliably identifiable from a `list-panels --json` diff. **Report back what you actually see** so this can be corrected.
+This prompt was written from `docs/cmux/cli-reference.md` alone for the `cmux new-split`/`list-panels` portion — **not run against a live cmux instance** as part of this template's own build. The dashboard-starting command itself (steps 3-5) *is* fully verified — it's the exact single-process form confirmed working end to end in `dashboard/NOTES.md`. What's unconfirmed is only the cmux pane-mechanics wrapper around it: whether `cmux new-split` needs an explicit `--workspace` flag to target a non-current workspace, and whether the newly created pane is reliably identifiable from a `list-panels --json` diff. **Report back what you actually see** so this can be corrected.
 
 ## Keeping it running
 

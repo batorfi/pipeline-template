@@ -17,18 +17,17 @@ Or, from an existing local clone:
 scaffold/scaffold.sh --template-version <pinned-tag> --target ./my-project
 ```
 
-This mechanizes steps 1, 2, 3, 5, 6, and the file-copy portion of 7 in one command: clones this template repo at the pinned tag (plain `git clone`, or `gh repo clone` if `gh` happens to be installed — neither requires auth against a public repo), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`. Steps 4 (cmux workspaces) and the remainder of 7 (actually starting and confirming the dashboard) are not run by `scaffold.sh` itself — they need cmux running, which a scaffold script can't assume — use the prompts named in each step below instead. Step 8 is never automated, on purpose.
+This mechanizes steps 1, 2, 3, 5, 6, and the file-copy portion of 7 in one command: clones this template repo at the pinned tag (plain `git clone`, or `gh repo clone` if `gh` happens to be installed — neither requires auth against a public repo), git-inits the target if needed, copies skills/dashboard/docs/specs-README, renders `constitution.template.md` and the factory-log templates, and runs `specify init`. Step 4 (cmux workspaces) and the remainder of 7 (actually starting and confirming the dashboard) are not run by `scaffold.sh` itself — they need cmux running, which a scaffold script can't assume — use `docs/manual-cmux-workspace-setup.md` and `docs/prompts/run-dashboard-in-pane.md` as described in each step below. Step 8 is never automated, on purpose.
 
 ## How to run a `docs/prompts/*.md` file
 
-Steps 4 and 7 below are done by hand, using `docs/prompts/setup-cmux-workspaces.md` and `docs/prompts/run-dashboard-in-pane.md`. These are **not** scripts and there is no CLI command that runs them — each is a markdown file containing one block of instructions meant to be pasted, as-is, into an active Claude Code session:
+Step 7 below is done by hand, using `docs/prompts/run-dashboard-in-pane.md`. This is **not** a script and there is no CLI command that runs it — it's a markdown file containing one block of instructions meant to be pasted, as-is, into an active Claude Code session running inside cmux:
 
-1. Open cmux and start (or switch to) a Claude Code session in the workspace you intend to become **main** — the one the director and the dashboard will live in. `scaffold.sh` itself never opens or touches cmux, so this session is something you start yourself, after scaffolding finishes.
-2. Open the prompt file in your scaffolded project (`docs/prompts/setup-cmux-workspaces.md` or `docs/prompts/run-dashboard-in-pane.md`) and copy everything inside the fenced code block under its own `## The prompt` heading — not the surrounding explanation, just that block.
-3. Paste it as a message to that Claude Code session. It then runs the real `cmux` and shell commands itself, since it has an actual terminal and an actual cmux socket to talk to — a plain assistant session with no cmux underneath it (e.g. one running outside cmux entirely) cannot execute these for you.
-4. Run `setup-cmux-workspaces.md` first (step 4) — it produces `.specify/cmux-workspaces.json`. Run `run-dashboard-in-pane.md` afterward (step 7), in the same or a new session, still inside main — it opens a `cmux new-split` and starts the dashboard inside it.
+1. Open cmux and start (or switch to) a Claude Code session in your **main** workspace — the one the director and the dashboard will live in. `scaffold.sh` itself never opens or touches cmux, so this session is something you start yourself, after scaffolding finishes.
+2. Open `docs/prompts/run-dashboard-in-pane.md` in your scaffolded project and copy everything inside the fenced code block under its own `## The prompt` heading — not the surrounding explanation, just that block.
+3. Paste it as a message to that Claude Code session. It then runs the real `cmux` and shell commands itself, since it has an actual terminal and an actual cmux socket to talk to — a plain assistant session with no cmux underneath it (e.g. one running outside cmux entirely) cannot execute this for you.
 
-Both prompts state their own caveats and ask you to report back what actually happened the first time you run them for real — neither has been exercised against a live cmux instance as part of this template's own test suite (see the Status section in the top-level README).
+The prompt states its own caveats and asks you to report back what actually happened the first time you run it for real — it hasn't been exercised against a live cmux instance as part of this template's own test suite (see the Status section in the top-level README).
 
 ## Scaffolding into an existing project
 
@@ -46,7 +45,7 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 1. **Git init** the target repository.
 2. **Skills copied** into `.claude/skills/` — the 11 role skills, pulled and pinned, never hand-authored per project.
 3. **`specify init . --integration claude`** — installs Spec Kit's own 6 skills and creates `.specify/memory/`, `.specify/scripts/`, `.specify/templates/`.
-4. **Stand up the 3 core cmux workspaces** — main, design, implementation. (Review/docs/PR workspaces can be created lazily on first use.) Three ways to do this, same result: paste `docs/prompts/setup-cmux-workspaces.md`'s prompt into a Claude Code session running inside cmux (see "How to run a `docs/prompts/*.md` file," above); run the equivalent `cmux` commands yourself following `docs/manual-cmux-workspace-setup.md`; or create and name the workspaces in the cmux app's own UI following `docs/manual-cmux-workspace-setup-gui.md` (one CLI lookup still needed at the end, since the GUI doesn't appear to expose a workspace's ID directly). cmux's CLI has no workspace-naming flag, so every path writes `.specify/cmux-workspaces.json`, the name→ID mapping the director skill reads to actually address these workspaces by `--workspace <id>` instead of a name cmux doesn't understand.
+4. **Stand up the 3 core cmux workspaces** — main, design, implementation. (Review/docs/PR workspaces can be created lazily on first use.) Run the `cmux` commands yourself following `docs/manual-cmux-workspace-setup.md`, which also gives a naming convention (`<project>-main`, `<project>-design`, `<project>-implementation`) so the cmux sidebar reads clearly at a glance. cmux's CLI has no workspace-naming flag beyond `rename-workspace`, so the doc's steps write `.specify/cmux-workspaces.json`, the name→ID mapping the director skill actually reads to address these workspaces by `--workspace <id>` instead of a display name it has no concept of.
 5. **Author `constitution.md`** from the rendered template — every `<<FILL:...>>` marker is a value only you can set: the triage rubric's module-boundary definition, both concurrency caps (per-feature and project-wide), both budget figures, the Opus-share ceiling percentage, and any project-specific sensitive surfaces. `scaffold.sh` refuses to consider scaffolding complete while any marker remains.
 6. **Initialize `factory-log.md`** — the constitution's own creation becomes entry zero, logged, not treated as pre-log setup.
 7. **Stand up the dashboard** — `dashboard/` is already copied by `scaffold.sh`; paste `docs/prompts/run-dashboard-in-pane.md`'s prompt into a Claude Code session in your main workspace (same mechanism as step 4, above) to generate `config.json`, start the backend, and confirm the frontend renders, all in a new pane alongside the director. See `docs/running-the-dashboard.md` for what that prompt actually runs, or to run those commands by hand outside cmux entirely.
@@ -61,7 +60,7 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 - [ ] `factory-log.md` exists, structured-entry format from entry zero, documenting the constitution's own creation.
 - [ ] The three core cmux workspaces exist and are reachable, and `.specify/cmux-workspaces.json` correctly maps `main`/`design`/`implementation` to their real IDs.
 - [ ] The dashboard's backend is running and smoke-tested; the frontend renders correctly against the near-empty state.
-- [ ] `docs/` present with all 11 files.
+- [ ] `docs/` present with all 10 files.
 - [ ] One synthetic dry-run feature has completed all 9 gates, every gate approved explicitly by a human.
 - [ ] Concurrency caps and budget figures have been revisited at least once using the dry run's own data.
 

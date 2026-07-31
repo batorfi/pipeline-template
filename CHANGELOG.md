@@ -2,6 +2,16 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.21 — 2026-07-31
+
+**Changed:**
+- **Consolidated cmux-workspace setup down to a single path**: `docs/manual-cmux-workspace-setup.md` (run the `cmux` CLI yourself) is now the only documented way to stand up the 3 core workspaces. Removed `scaffold/prompts/setup-cmux-workspaces.md` (paste-into-Claude-Code) and `docs/manual-cmux-workspace-setup-gui.md` (cmux app UI) — both existed as alternatives added in earlier versions, removed by direct request in favor of keeping one well-maintained path instead of three. `docs/` file count drops from 11 to 10. Every reference to the removed files — in README, `docs/scaffolding-guide.md`, `skills/director/SKILL.md`, and `scaffold/prompts/run-dashboard-in-pane.md` — updated accordingly.
+- `do_copy_steps` no longer has anything to copy from the removed prompt file; `scaffold/prompts/` now contains only `run-dashboard-in-pane.md`, still copied into scaffolded projects as `docs/prompts/run-dashboard-in-pane.md` exactly as before.
+
+**Added:**
+- A concrete naming convention in the remaining doc: `<project>-main`, `<project>-design`, `<project>-implementation`, using the project's own directory name as a prefix so the cmux sidebar reads clearly at a glance instead of showing generic or identical-looking entries. Requested directly: a user wanted workspaces they could visually recognize by role while following the guide.
+- `docs/manual-cmux-workspace-setup.md` now includes an explicit `cmux rename-workspace` step for each workspace (main renames itself; design/implementation are renamed via `--workspace <id>` without switching into them), plus a new caveat noting `rename-workspace`'s exact behavior (multi-word name quoting, error handling on a bad ID) hasn't been run against a live instance, same status as the rest of this doc. `.specify/cmux-workspaces.json` still only ever stores IDs — display names are purely for the human, not read by any skill — stated explicitly so it's clear this is a convenience, not a new mechanism.
+
 ## v0.1.20 — 2026-07-30
 
 **Added:**
