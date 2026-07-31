@@ -21,15 +21,20 @@ export function renderLivePanes({ panes, panesAvailable }) {
 function renderPane(pane) {
   const tierBadge = pane.tier ? `<span class="tier-badge tier-badge--${pane.tier}">${pane.tier}</span>` : "";
   const statusBadgeClass = pane.status === "running" ? "status-badge--healthy" : "status-badge--caution";
+  // cmux has no concept of "pipeline role" (researcher/worker/etc.) — role
+  // is genuinely unknown, not a display bug. Rather than an alarming
+  // "unknown role" label, fall back to the workspace name, which cmux does
+  // actually know and which the backend always supplies.
+  const title = pane.role || (pane.workspace ? `${pane.workspace} workspace` : "Pane");
+  const workspaceLine = pane.role && pane.workspace ? `<span class="data-mono">${escapeHtml(pane.workspace)}</span> · ` : "";
   return `
     <div class="card">
       <div class="card__header">
-        <span class="card__title">${escapeHtml(pane.role || "unknown role")}</span>
+        <span class="card__title">${escapeHtml(title)}</span>
         <span>${tierBadge} <span class="status-badge ${statusBadgeClass}">${escapeHtml(pane.status)}</span></span>
       </div>
       <div class="card__body">
-        <span class="data-mono">${escapeHtml(pane.workspace || "")}</span>
-        ${pane.current_task ? ` · ${escapeHtml(pane.current_task)}` : ""}
+        ${workspaceLine}${pane.current_task ? escapeHtml(pane.current_task) : ""}
       </div>
     </div>
   `;

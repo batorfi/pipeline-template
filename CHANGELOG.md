@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.30 — 2026-07-31
+
+**Fixed:**
+- Every real pane in "Running Now" showed "unknown role" — not a bug in the v0.1.29 panes fix, but an honest gap: cmux has no concept of "pipeline role" (researcher/worker/etc.), so `role` is genuinely `null` for every real pane, and the frontend rendered that as an alarming-sounding "unknown role" label. `live-panes.js` now falls back to the workspace name (`design workspace`, `implementation workspace`) as the card title when role is unknown — data cmux does actually supply, via `config.cmux_workspace_ids`, rather than a placeholder implying something is broken.
+- Real per-pipeline-role tagging (researcher vs worker vs code-reviewer, etc.) remains a genuine open gap, not addressed here — there's no confirmed cmux mechanism yet for a spawned pane to carry that metadata for `/panes` to read back.
+
 ## v0.1.29 — 2026-07-31
 
 **Fixed:**
