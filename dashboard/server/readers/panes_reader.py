@@ -1,11 +1,30 @@
 """GET /panes's data layer — implements BE-020, BE-021.
 
-Commands confirmed against docs/cmux/cli-reference.md: `cmux ping` (liveness),
-`cmux list-panels --json`, `cmux list-pane-surfaces --json`. The exact JSON
-response shape from list-panels/list-pane-surfaces is NOT yet confirmed
-against a live cmux instance (flagged in implementation-specs.md §7) — the
-parsing below is a best-effort mapping and should be revisited once a live
-instance is available to test against, per T024's tracked exception.
+Confirmed against a live cmux instance (2026-07-31), after the original
+implementation was found completely broken during a real dry-run feature:
+the director spawned multiple real panes across design/implementation
+workspaces, but /panes always reported none. Root causes, all fixed here:
+
+1. `cmux list-panels --json`'s real top-level key is "surfaces", not
+   "panels" — the original code's `.get("panels", [])` fallback always
+   returned an empty list against real output.
+2. `list-panels` is scoped to whatever workspace the invoking process
+   happens to be in — it needs an explicit `--workspace <id>` per call to
+   see panes in a workspace other than the caller's own. Without the three
+   IDs from .specify/cmux-workspaces.json, the backend could only ever see
+   its own workspace, never design/implementation where the director
+   actually works.
+3. Real surfaces have no "status" field at all (no "running"/"idle"
+   concept cmux exposes) — every real terminal/agentSession surface is
+   now reported with status "running", the closest honest approximation
+   available: if cmux currently has it open, something is likely
+   happening in it. There's genuinely no way yet to distinguish "actively
+   computing" from "idle, waiting for input" from cmux's own data.
+
+`list-pane-surfaces` — a second command the original code also called —
+was never actually observed to add anything beyond what `list-panels`
+itself already returns (which, confusingly, is itself surface-level data,
+not a separate "panel" concept); dropped rather than kept unconfirmed.
 """
 
 from __future__ import annotations
@@ -16,6 +35,12 @@ from typing import Any
 
 PING_TIMEOUT_SECONDS = 2
 LIST_TIMEOUT_SECONDS = 5
+
+# Surface types that represent an actual running process worth showing as a
+# "live pane" — confirmed real types also include "markdown" (an open file
+# preview tab) and "browser" (the dashboard's own tab, most commonly),
+# neither of which is pipeline work happening.
+ACTIVE_SURFACE_TYPES = {"terminal", "agentSession"}
 
 
 def _run_cmux(args: list[str], timeout: float, socket_path: str | None) -> subprocess.CompletedProcess:
@@ -34,7 +59,57 @@ def _run_cmux(args: list[str], timeout: float, socket_path: str | None) -> subpr
     )
 
 
-def read_panes(socket_path: str | None = None) -> dict[str, Any]:
+def _panes_for_workspace(label: str, workspace_id: str, socket_path: str | None) -> list[dict[str, Any]]:
+    args = ["list-panels", "--json"]
+    if workspace_id:
+        args += ["--workspace", workspace_id]
+    proc = _run_cmux(args, LIST_TIMEOUT_SECONDS, socket_path)
+    if proc.returncode != 0:
+        return []
+
+    try:
+        data = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return []
+
+    surfaces = data.get("surfaces", []) if isinstance(data, dict) else []
+
+    # Group by pane_ref (a pane can have multiple surfaces/tabs open — e.g.
+    # a terminal tab plus several markdown preview tabs sharing one pane).
+    # Report one entry per pane, preferring the tab actually selected in it,
+    # among the types that represent real work.
+    by_pane: dict[str, dict[str, Any]] = {}
+    for s in surfaces:
+        if s.get("type") not in ACTIVE_SURFACE_TYPES:
+            continue
+        pane_ref = s.get("pane_ref")
+        if not pane_ref:
+            continue
+        existing = by_pane.get(pane_ref)
+        if existing is None or s.get("selected_in_pane"):
+            by_pane[pane_ref] = s
+
+    panes = []
+    for pane_ref, s in by_pane.items():
+        resume_binding = s.get("resume_binding") or {}
+        panes.append(
+            {
+                "workspace": label,
+                "pane_id": pane_ref,
+                "role": None,  # not a documented cmux field — no reliable signal
+                # observed yet for which pipeline role (researcher/worker/etc.)
+                # a pane belongs to; title is the best available proxy.
+                "status": "running",  # cmux exposes no running/idle distinction;
+                # this reflects "cmux currently has this pane open," not
+                # confirmed active computation — see module docstring.
+                "current_task": s.get("title"),
+                "is_claude_session": resume_binding.get("kind") == "claude",
+            }
+        )
+    return panes
+
+
+def read_panes(workspace_ids: dict[str, str] | None = None, socket_path: str | None = None) -> dict[str, Any]:
     """BE-021: bounded timeout, panes_unavailable flag on any failure — never hangs."""
     try:
         ping = _run_cmux(["ping"], PING_TIMEOUT_SECONDS, socket_path)
@@ -44,46 +119,20 @@ def read_panes(socket_path: str | None = None) -> dict[str, Any]:
     if ping.returncode != 0:
         return {"panes": [], "panes_unavailable": True}
 
+    if not workspace_ids:
+        # No .specify/cmux-workspaces.json — fall back to whatever workspace
+        # the backend's own process happens to be in, the pre-fix behavior,
+        # rather than reporting unavailable when cmux itself is reachable.
+        try:
+            return {"panes": _panes_for_workspace("unknown", "", socket_path), "panes_unavailable": False}
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            return {"panes": [], "panes_unavailable": True}
+
+    all_panes: list[dict[str, Any]] = []
     try:
-        panels_proc = _run_cmux(["list-panels", "--json"], LIST_TIMEOUT_SECONDS, socket_path)
-        surfaces_proc = _run_cmux(["list-pane-surfaces", "--json"], LIST_TIMEOUT_SECONDS, socket_path)
+        for label, workspace_id in workspace_ids.items():
+            all_panes.extend(_panes_for_workspace(label, workspace_id, socket_path))
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
         return {"panes": [], "panes_unavailable": True}
 
-    if panels_proc.returncode != 0:
-        return {"panes": [], "panes_unavailable": True}
-
-    try:
-        panels_data = json.loads(panels_proc.stdout or "[]")
-    except json.JSONDecodeError:
-        return {"panes": [], "panes_unavailable": True}
-
-    surfaces_by_panel: dict[str, Any] = {}
-    if surfaces_proc.returncode == 0:
-        try:
-            surfaces_data = json.loads(surfaces_proc.stdout or "[]")
-            for s in surfaces_data if isinstance(surfaces_data, list) else []:
-                panel_id = s.get("panelId") or s.get("panel_id") or s.get("id")
-                if panel_id:
-                    surfaces_by_panel[panel_id] = s
-        except json.JSONDecodeError:
-            pass  # surfaces are supplementary; a bad payload here doesn't fail the whole request
-
-    panes = []
-    raw_panels = panels_data if isinstance(panels_data, list) else panels_data.get("panels", [])
-    for p in raw_panels:
-        panel_id = p.get("id") or p.get("panelId")
-        surface = surfaces_by_panel.get(panel_id, {})
-        panes.append(
-            {
-                "workspace": p.get("workspace") or p.get("workspaceId"),
-                "pane_id": panel_id,
-                "role": surface.get("role"),  # not a documented cmux field — populated once a
-                # convention for tagging a pane's pipeline role exists (e.g. via cmux set-status);
-                # None until then, and the frontend must handle that (FE-AC2-style degradation).
-                "status": p.get("status", "unknown"),
-                "current_task": surface.get("currentTask") or surface.get("current_task"),
-            }
-        )
-
-    return {"panes": panes, "panes_unavailable": False}
+    return {"panes": all_panes, "panes_unavailable": False}

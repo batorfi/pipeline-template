@@ -20,6 +20,7 @@ class DashboardConfig:
     tasks_path: Path | None
     constitution_path: Path
     cmux_socket_path: str | None
+    cmux_workspace_ids: dict[str, str] | None
 
     def resolve_tasks_path(self) -> Path | None:
         """The configured tasks_path is a static value set once at scaffold
@@ -59,10 +60,28 @@ class DashboardConfig:
         root = Path(project_root).resolve() if project_root else config_json_path.parent.parent
 
         tasks_path = root / data["tasks_path"]
+
+        # .specify/cmux-workspaces.json holds the main/design/implementation
+        # name->ID mapping (docs/manual-cmux-workspace-setup.md /
+        # setup-cmux-workspaces.sh). /panes needs these IDs to query the
+        # actual workspaces the director spawns real panes into — without
+        # them, cmux list-panels only ever sees whatever workspace the
+        # dashboard backend's own process happens to be running in, which is
+        # very often none of the three that actually matter.
+        cmux_workspaces_path = root / ".specify" / "cmux-workspaces.json"
+        cmux_workspace_ids: dict[str, str] | None = None
+        if cmux_workspaces_path.exists():
+            try:
+                with open(cmux_workspaces_path, encoding="utf-8") as fh:
+                    cmux_workspace_ids = json.load(fh)
+            except (json.JSONDecodeError, OSError):
+                cmux_workspace_ids = None
+
         return cls(
             project_root=root,
             factory_log_path=root / data["factory_log_path"],
             tasks_path=tasks_path if tasks_path else None,
             constitution_path=root / data["constitution_path"],
             cmux_socket_path=data.get("cmux_socket_path") or os.environ.get("CMUX_SOCKET_PATH"),
+            cmux_workspace_ids=cmux_workspace_ids,
         )

@@ -2,6 +2,16 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.29 — 2026-07-31
+
+**Fixed:**
+- **The user was right, I was wrong**: after the previous entry claimed "Running Now" showing empty was expected (simulated subagents, no real panes), the user confirmed the director *did* spawn multiple real panes. Investigation found three real, compounding bugs, none of them "expected behavior":
+  1. `read_panes()` parsed `panels_data.get("panels", [])` — but a real `cmux list-panels --json` response keys panes under `"surfaces"`, not `"panels"`. Every real call returned an empty list, silently, with `panes_unavailable: false` (looking like "confirmed nothing running," not "broken").
+  2. `list-panels` is scoped to whatever workspace the *calling process* is in — without an explicit `--workspace <id>` per call, the backend could only ever see its own workspace, never `design`/`implementation` where the director actually spawns worker panes. `.specify/cmux-workspaces.json` (which has exactly the IDs needed) was never even read by the backend — `DashboardConfig` gained a `cmux_workspace_ids` field, loaded from that file if present.
+  3. The frontend filters panes on `status === "running" || "idle"`, but cmux's real data exposes no status/liveness field at all — the backend used to always emit `"unknown"`, silently filtering out every real pane even if the above two bugs were fixed. Real terminal/agentSession surfaces are now reported as `"running"` (the closest honest signal available — cmux has no busy/idle distinction to report).
+- `panes_reader.py` rewritten: queries each configured workspace explicitly (falls back to the caller's own workspace, matching prior behavior, if `cmux-workspaces.json` is missing), deduplicates by `pane_ref` preferring the selected tab, and only counts `terminal`/`agentSession` surface types as real panes (excludes `markdown` file-preview tabs and the dashboard's own `browser` tab, both real surface types that showed up in testing but aren't pipeline work). Dropped the second `list-pane-surfaces` call the original code also made — never observed to add anything `list-panels` doesn't already return.
+- 5 new tests (`test_panes_reader.py`, mocking `subprocess.run` against the exact confirmed real response shape; suite now 21 total). Verified live against the real scaffolded project mid-dry-run: `/panes` went from always-empty to correctly listing all 9 real panes across main/design/implementation, each with a real task title.
+
 ## v0.1.28 — 2026-07-31
 
 **Fixed:**

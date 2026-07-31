@@ -16,6 +16,7 @@ def _config(tmp_path, tasks_path_value: str):
         tasks_path=(tmp_path / tasks_path_value) if tasks_path_value else None,
         constitution_path=tmp_path / "constitution.md",
         cmux_socket_path=None,
+        cmux_workspace_ids=None,
     )
 
 

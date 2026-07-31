@@ -12,4 +12,4 @@ router = APIRouter()
 @router.get("/panes")
 def get_panes(request: Request):
     config = request.app.state.config
-    return read_panes(socket_path=config.cmux_socket_path)
+    return read_panes(workspace_ids=config.cmux_workspace_ids, socket_path=config.cmux_socket_path)
