@@ -2,6 +2,15 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.32 — 2026-07-31
+
+**Added:**
+- **Real per-pane token usage**, replacing the $0.00-everywhere placeholder in "Running Now": investigated why every `factory-log.md` `usage:` block was hardcoded to `estimated_cost_usd: 0.0` — confirmed `cmux` exposes no usage/cost/token command of any kind (checked its full `--help` command list). But a real pane's `resume_binding.checkpoint_id` (when it's a Claude session) is the same UUID Claude Code uses to name its own local session transcript at `~/.claude/projects/<project-dir-slug>/<checkpoint_id>.jsonl`, and each assistant turn in that transcript carries a real `message.usage` block — confirmed against a real transcript from a real dry-run feature's worker pane.
+- New `token_usage_reader.py`: given a session ID, searches `~/.claude/projects/*/<session-id>.jsonl` (session IDs are unique, so no need to derive the exact cwd-slug path) and sums real `input_tokens`/`output_tokens`/cache tokens across the transcript. Returns `{"available": False}` cleanly if the transcript can't be found — never raises, same discipline as every other reader here.
+- `panes_reader.py` now attaches real `tokens` data to every Claude-session pane in `/panes`. `live-panes.js` displays it on each pane's card (`X.Xk tokens (Y in / Z out)`) — real numbers, not a cost estimate, since there's still no confirmed pricing data source.
+- 8 new tests (`test_token_usage_reader.py` + one integration test in `test_panes_reader.py`; suite now 26 total). Verified live against the real scaffolded project: real panes now show real token counts in the hundreds of thousands, sourced from their actual local Claude Code transcripts.
+- **Not addressed here**: the totals panel (`/stats`, aggregate spend across a whole feature) still reads `0.0` from `factory-log.md`'s historical usage blocks — this fix covers currently-open panes' live token counts only, since closed panes' checkpoint IDs aren't retained anywhere once logged without them. Making the totals panel real would need the director to log each pane's `checkpoint_id` into `factory-log.md` going forward, a separate, not-yet-scoped change.
+
 ## v0.1.31 — 2026-07-31
 
 **Fixed:**

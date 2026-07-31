@@ -27,6 +27,13 @@ function renderPane(pane) {
   // actually know and which the backend always supplies.
   const title = pane.role || (pane.workspace ? `${pane.workspace} workspace` : "Pane");
   const workspaceLine = pane.role && pane.workspace ? `<span class="data-mono">${escapeHtml(pane.workspace)}</span> · ` : "";
+  // Real token counts, read from the pane's own local Claude Code session
+  // transcript — not a cost estimate (cmux exposes no cost/pricing data at
+  // all), just what actually flowed through that session so far.
+  const tokensLine =
+    pane.tokens && pane.tokens.available
+      ? `<div class="card__tokens data-mono">${formatTokenCount(pane.tokens.total_tokens)} tokens (${formatTokenCount(pane.tokens.input_tokens)} in / ${formatTokenCount(pane.tokens.output_tokens)} out)</div>`
+      : "";
   return `
     <div class="card">
       <div class="card__header">
@@ -36,8 +43,15 @@ function renderPane(pane) {
       <div class="card__body">
         ${workspaceLine}${pane.current_task ? escapeHtml(pane.current_task) : ""}
       </div>
+      ${tokensLine}
     </div>
   `;
+}
+
+function formatTokenCount(n) {
+  if (typeof n !== "number") return "0";
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
 }
 
 function escapeHtml(s) {

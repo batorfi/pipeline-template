@@ -33,6 +33,8 @@ import json
 import subprocess
 from typing import Any
 
+from .token_usage_reader import read_token_usage
+
 PING_TIMEOUT_SECONDS = 2
 LIST_TIMEOUT_SECONDS = 5
 
@@ -92,6 +94,13 @@ def _panes_for_workspace(label: str, workspace_id: str, socket_path: str | None)
     panes = []
     for pane_ref, s in by_pane.items():
         resume_binding = s.get("resume_binding") or {}
+        is_claude_session = resume_binding.get("kind") == "claude"
+        checkpoint_id = resume_binding.get("checkpoint_id")
+
+        tokens = None
+        if is_claude_session and checkpoint_id:
+            tokens = read_token_usage(checkpoint_id)
+
         panes.append(
             {
                 "workspace": label,
@@ -103,7 +112,11 @@ def _panes_for_workspace(label: str, workspace_id: str, socket_path: str | None)
                 # this reflects "cmux currently has this pane open," not
                 # confirmed active computation — see module docstring.
                 "current_task": s.get("title"),
-                "is_claude_session": resume_binding.get("kind") == "claude",
+                "is_claude_session": is_claude_session,
+                "tokens": tokens,  # real, not a placeholder — read from the
+                # pane's own local Claude Code session transcript, keyed by
+                # resume_binding.checkpoint_id. None if not a Claude session
+                # or the transcript can't be found; see token_usage_reader.py.
             }
         )
     return panes

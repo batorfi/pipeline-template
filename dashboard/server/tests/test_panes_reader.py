@@ -71,6 +71,7 @@ def test_real_response_shape_parses_correctly(monkeypatch):
     assert pane["current_task"] == "✳ Claude Code"
     assert pane["status"] == "running"
     assert pane["is_claude_session"] is True
+    assert pane["tokens"] is None  # resume_binding has no checkpoint_id here
 
 
 def test_queries_each_configured_workspace_with_explicit_flag(monkeypatch):
@@ -118,6 +119,36 @@ def test_ping_failure_reports_unavailable(monkeypatch):
     result = read_panes(workspace_ids={"main": "workspace:15"})
 
     assert result == {"panes": [], "panes_unavailable": True}
+
+
+def test_claude_session_pane_gets_real_token_usage(monkeypatch):
+    """A pane with a real checkpoint_id gets real token data attached, read
+    via token_usage_reader.read_token_usage -- not the previous permanent
+    $0.00-equivalent placeholder."""
+    from dashboard.server.readers import panes_reader
+
+    def fake_run(args, **kwargs):
+        if args[1] == "ping":
+            return _ping_ok()
+        surfaces = [
+            _surface(
+                pane_ref="pane:27",
+                title="✳ Claude Code",
+                resume_binding={"kind": "claude", "checkpoint_id": "session-real-123"},
+            ),
+        ]
+        return _list_panels_result(surfaces, "workspace:19")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        panes_reader,
+        "read_token_usage",
+        lambda session_id: {"available": True, "total_tokens": 4200} if session_id == "session-real-123" else None,
+    )
+
+    result = read_panes(workspace_ids={"design": "workspace:19"})
+
+    assert result["panes"][0]["tokens"] == {"available": True, "total_tokens": 4200}
 
 
 def test_markdown_and_browser_surfaces_excluded(monkeypatch):

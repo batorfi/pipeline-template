@@ -115,6 +115,13 @@
   color: var(--color-text-muted);
 }
 
+.card__tokens {
+  margin-top: var(--space-1);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
 .card__summary {
   margin: var(--space-2) 0 0 0;
   font-size: 0.9rem;
