@@ -134,6 +134,16 @@ Spawn the **PR writer** (PR workspace, Sonnet) with the spec, diff, and approved
 
 Your job on this feature ends here. Integration into the default branch is the team's normal review process, not yours.
 
+## Pane cleanup
+
+Once a pane's task is fully complete and its output has been incorporated (a worker's diff merged, a researcher's `context.md` received, a reviewer's report read and acted on, a gate presented from its output and decided) — close it. cmux has no single "close this pane" command; a pane is a container for one or more surfaces, so:
+1. `cmux list-pane-surfaces --pane <pane-id> --workspace <workspace-id> --json` to find every surface ref in that pane.
+2. `cmux close-surface --surface <surface-ref> --workspace <workspace-id>` for each one.
+
+Confirmed against a live cmux instance: closing a pane's last surface removes the pane entirely — it stops appearing in `list-panels`, and so stops appearing in the dashboard's "Running Now."
+
+Do this as you wrap up each stage, not just once at the very end of the feature. A real dry run left 9 panes open in cmux — including two blank, months-stale leftover shells with no actual session attached — because nothing ever closed one, all the way from triage through the PR gate. Every pane you leave open after its work is done is a pane a human has to manually figure out is safe to close later, and in the meantime makes "what's actually happening right now" harder to read at a glance, exactly what "Running Now" exists to answer.
+
 ## Logging discipline
 
 Every stage transition — pane spawned, artifact produced, gate presented, gate decided — gets one append-only entry in `.specify/factory-log.md`: what just finished, a plain-language summary (not a raw artifact dump), a rough usage/cost figure for the tier that just ran, and, once answered, the human's decision and any feedback. This log is what the dashboard reads and what later features use to recalibrate the triage rubric and tier assignments — treat gaps in it as a defect in your own operation, not an optional nicety.

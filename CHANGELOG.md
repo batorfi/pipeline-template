@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.34 — 2026-07-31
+
+**Added:**
+- **Pane cleanup, confirmed against a live cmux instance**: nothing in the director's instructions ever told it to close a pane once its task was done — a real dry run left 9 panes open in cmux, including two blank leftover shells with no actual session attached, because nothing ever closed one from triage through the PR gate. `skills/director/SKILL.md` gains a "Pane cleanup" section: close a pane's task once its output is incorporated, via `cmux list-pane-surfaces --pane <id> --workspace <id>` to find its surfaces, then `cmux close-surface --surface <ref> --workspace <id>` for each one (cmux has no single "close this pane" command — a pane is a container for one or more surfaces). Confirmed live: closing a pane's last surface removes the pane entirely from `list-panels`, so it stops appearing in the dashboard's "Running Now."
+- Applied by hand to a real already-scaffolded project: closed its two stale blank panes, verified via `/panes` going from 9 entries down to 7, all genuinely real Claude sessions.
+
 ## v0.1.33 — 2026-07-31
 
 **Changed:**
