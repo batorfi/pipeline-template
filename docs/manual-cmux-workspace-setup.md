@@ -6,70 +6,65 @@ Requires the `cmux` CLI on `PATH` (`cmux --version` to check) and `jq` for parsi
 
 ## Why a name→ID mapping file at all
 
-cmux's CLI has no workspace-naming flag — `cmux new-workspace` takes no name argument, and workspaces are addressed only by opaque ID. Every role skill in this pipeline talks about "the design workspace" / "the implementation workspace" as if those are names cmux understands — they aren't. `.specify/cmux-workspaces.json` is what makes that vocabulary real: the director skill reads it at startup and uses `--workspace <id>` wherever it would otherwise need a name cmux has no concept of.
+cmux's CLI addresses workspaces by opaque ID (`workspace:<n>`), not by name. Every role skill in this pipeline talks about "the design workspace" / "the implementation workspace" as if those are names cmux understands — they aren't. `.specify/cmux-workspaces.json` is what makes that vocabulary real: the director skill reads it at startup and uses `--workspace <id>` wherever it would otherwise need a name cmux has no concept of.
 
 ## Naming convention
 
-`.specify/cmux-workspaces.json` is what makes these roles addressable to the pipeline's skills — but nothing stops the *cmux sidebar itself* from also showing you, at a glance, which workspace is which, so you're not relying on memory or tab order while you work. Give each workspace a real display name via `cmux rename-workspace`, using your project's own directory name as a prefix so it's unambiguous if you ever have more than one of these pipelines running side by side:
-
-```bash
-PROJECT=$(basename "$PWD")
-# e.g. PROJECT=my-project → my-project-main, my-project-design, my-project-implementation
-```
-
-This is optional — the pipeline itself only ever reads IDs from the JSON file below, never a display name — but recommended, since it's the difference between a sidebar full of identical-looking "Untitled" entries and one that reads clearly at a glance.
+`.specify/cmux-workspaces.json` is what makes these roles addressable to the pipeline's skills — but nothing stops the *cmux sidebar itself* from also showing you, at a glance, which workspace is which, so you're not relying on memory or tab order while you work. Give each workspace a real display name via `cmux rename-workspace`, using your project's own directory name as a prefix so it's unambiguous if you ever have more than one of these pipelines running side by side — e.g. for `my-project`: `my-project-main`, `my-project-design`, `my-project-implementation`. This is optional — the pipeline itself only ever reads IDs from the JSON file below, never a display name — but recommended, since it's the difference between a sidebar full of identical-looking "Untitled" entries and one that reads clearly at a glance.
 
 ## Steps
 
 Run these from inside your project root, in the cmux workspace you want to become **main** — this is where the director and dashboard will live.
 
-**1. Rename the current workspace to "main" and record its ID:**
-
 ```bash
 PROJECT=$(basename "$PWD")
-cmux rename-workspace "${PROJECT}-main"
-cmux current-workspace --json | jq
+
+# 1. Rename the current workspace to "<project>-main" and capture its ID.
+#    cmux rename-workspace, with no --workspace flag, targets the workspace
+#    you're currently in, and prints its ID directly (`OK workspace:<n>`) —
+#    confirmed against a real cmux instance, no separate lookup needed.
+MAIN_ID=$(cmux rename-workspace "${PROJECT}-main" | grep -oE 'workspace:[0-9]+')
+echo "main: $MAIN_ID"
+
+# 2. Create and rename "design". cmux new-workspace also prints the new
+#    workspace's ID directly in its own output (`OK workspace:<n>`) —
+#    confirmed; no before/after diff against `list-workspaces` is needed.
+DESIGN_ID=$(cmux new-workspace | grep -oE 'workspace:[0-9]+')
+cmux rename-workspace --workspace "$DESIGN_ID" "${PROJECT}-design"
+echo "design: $DESIGN_ID"
+
+# 3. Create and rename "implementation", same pattern.
+IMPL_ID=$(cmux new-workspace | grep -oE 'workspace:[0-9]+')
+cmux rename-workspace --workspace "$IMPL_ID" "${PROJECT}-implementation"
+echo "implementation: $IMPL_ID"
 ```
 
-Note the ID field in the output (confirm its exact key against your `cmux` version — this doc hasn't been run against a live instance yet, see the caveat below).
+`--workspace <id>` on step 2/3's rename does **not** switch you into that workspace — you stay in main throughout, per "What NOT to do here" below.
 
-**2. Create, then rename, the "design" and "implementation" workspaces:**
-
-```bash
-cmux list-workspaces --json > /tmp/cmux-before.json
-cmux new-workspace
-cmux list-workspaces --json > /tmp/cmux-after.json
-diff <(jq -S . /tmp/cmux-before.json) <(jq -S . /tmp/cmux-after.json)
-```
-
-The diff shows the newly created workspace — record its ID as "design." If `cmux new-workspace` turns out to print the new ID directly in its own output on your version, skip the before/after diff and just use that instead — check your terminal's output before resorting to the diff. Then rename it without switching into it:
-
-```bash
-cmux rename-workspace --workspace <design-id> "${PROJECT}-design"
-```
-
-Repeat the same four commands (before/new/after/diff/rename) once more for "implementation," using `${PROJECT}-implementation`.
-
-**3. Write the mapping** to `.specify/cmux-workspaces.json`, exactly this shape:
+**4. Write the mapping** to `.specify/cmux-workspaces.json`:
 
 ```bash
 cat > .specify/cmux-workspaces.json <<EOF
 {
-  "main": "<id from step 1>",
-  "design": "<first id from step 2>",
-  "implementation": "<second id from step 2>"
+  "main": "$MAIN_ID",
+  "design": "$DESIGN_ID",
+  "implementation": "$IMPL_ID"
 }
 EOF
 ```
 
-**4. Verify** all three IDs are real and distinct:
+**5. Verify** all three IDs are real and distinct:
 
 ```bash
-cmux list-workspaces --json | jq
+cmux list-workspaces --json | jq '.workspaces[] | {ref, title}'
 cat .specify/cmux-workspaces.json
 ```
 
-Confirm the three IDs in the file actually appear in `list-workspaces`' output and are pairwise different.
+Confirm the three IDs in the file actually appear in `list-workspaces`' output (as each entry's `ref` field) and are pairwise different.
+
+## A note on cmux's own output
+
+Recent `cmux` versions print a one-time notice like `cmux: 'rename-workspace' is now an alias for 'cmux workspace rename'. The legacy form keeps working indefinitely` the first time you use a legacy-form command in a session. Harmless — the commands above keep working exactly as shown — but if it's noisy, set `CMUX_QUIET=1` in your shell to silence it, or switch to the newer noun-verb form (`cmux workspace rename`, `cmux workspace create`, `cmux workspace list`) directly; both forms behave identically as far as this doc is concerned.
 
 ## What NOT to do here
 
@@ -77,15 +72,15 @@ Confirm the three IDs in the file actually appear in `list-workspaces`' output a
 - Don't switch into the new design/implementation workspaces as part of this — stay in main.
 - Don't spawn any panes into the new workspaces yet — this is workspace setup only, not feature work.
 
-## Caveat, stated plainly
+## Confirmed against a real cmux instance (2026-07-31)
 
-Written from the `cmux` CLI reference alone — **not yet run against a live cmux instance** as part of this template's own test suite. Specifically unconfirmed:
+Earlier drafts of this doc carried several unconfirmed assumptions, written from the CLI reference alone. A real run resolved them:
 
-- Whether `cmux new-workspace` prints the new workspace's ID directly (in which case the before/after diff in step 2 is unnecessary), or whether a diff against `list-workspaces` is genuinely required.
-- The exact JSON key name for a workspace's ID in `current-workspace --json` / `list-workspaces --json` output.
-- Whether `cmux rename-workspace --workspace <id> <name>` accepts a multi-word name without quoting issues, and whether it silently fails or errors loudly if given an ID that doesn't exist.
+- `cmux new-workspace` and `cmux rename-workspace` **do** print the new/target workspace's ID directly in their own output (`OK workspace:<n>`) — no before/after diff against `list-workspaces` is needed, contrary to what an earlier draft assumed as the fallback path.
+- The JSON key for a workspace's ID is `ref` (e.g. `"ref": "workspace:16"`) inside each entry of `list-workspaces --json`'s `workspaces` array; `current-workspace --json` wraps the same value one level up as `workspace_ref`.
+- `cmux rename-workspace --workspace <id> <name>` works as documented, targeting a workspace other than the current one without switching into it.
 
-**When you run this for real, please report back what actually happened** — this doc can then be corrected against real behavior.
+Still unconfirmed: whether a multi-word name needs different quoting than shown above (the real run used single-word, hyphenated names throughout, so this wasn't exercised) — report back if you hit a quoting issue.
 
 ## Consumers of this file
 

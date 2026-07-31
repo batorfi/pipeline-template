@@ -2,6 +2,15 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.22 — 2026-07-31
+
+**Fixed:**
+- **Real doc bug, found running the doc for real**: `docs/manual-cmux-workspace-setup.md`'s copy-pasteable example used a literal `<design-id>` placeholder inside an unquoted bash command (`cmux rename-workspace --workspace <design-id> "..."`) — the shell parsed `<design-id>` as input redirection from a file literally named `design-id`, producing a confusing `no such file or directory` error instead of doing anything useful. Rewrote the steps to capture each workspace's ID into a shell variable (`MAIN_ID`, `DESIGN_ID`, `IMPL_ID`) as it's created, so nothing in the copy-pasteable block is a placeholder needing manual substitution.
+
+**Confirmed:**
+- The same real run resolved every caveat this doc had been carrying since it was first written from the CLI reference alone: `cmux new-workspace` and `cmux rename-workspace` both print the relevant workspace's ID directly in their own output (`OK workspace:<n>`), so the before/after `list-workspaces` diff the doc previously used as its primary method (with printed-ID as an unconfirmed maybe-shortcut) turned out to be the unnecessary path, not the other way around — now removed entirely. The JSON key for a workspace's ID is `ref` inside `list-workspaces --json`'s `workspaces` array entries, and `workspace_ref` one level up in `current-workspace --json`. `cmux rename-workspace --workspace <id> <name>` works exactly as documented.
+- Still open: whether a multi-word workspace name needs different quoting (the real run used only single-word, hyphenated names).
+
 ## v0.1.21 — 2026-07-31
 
 **Changed:**
