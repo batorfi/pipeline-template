@@ -2,6 +2,13 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.27 — 2026-07-31
+
+**Fixed:**
+- **Critical bug, found by a real user asking Claude Code "tell me about the current skillset" and seeing only Spec Kit's `speckit-*` skills** — none of the pipeline's 11 role skills (director, worker, researcher, etc.) appeared. Root cause: those skills are copied into `.claude/skills-pipeline-roles/`, a non-standard directory name chosen specifically to avoid colliding with Spec Kit's own `.claude/skills/speckit-*` names — but Claude Code's own skill discovery only scans `.claude/skills/`, so the role skills were never actually loadable in any scaffolded project, since this template's very first version. The director skill — the one thing the whole pipeline is built around — was invisible the entire time.
+- Since no role skill name actually collides with any `speckit-*` name, the fix adds a copy of each role skill directly into `.claude/skills/` as well, alongside the existing canonical copy in `.claude/skills-pipeline-roles/` (kept as the versioned source of truth `--sync` diffs against). New `copy_role_skills_into_claude_skills()`, called after `specify init` runs (not before — `specify init`'s behavior toward a pre-existing `.claude/skills/` directory isn't confirmed either way, so this ordering avoids the risk of it wiping the copies) in fresh scaffolds, and after the wholesale skills copy in `--sync`.
+- Verified: simulated a pre-existing `.claude/skills/speckit-plan/` directory before running the new copy step — all 11 role skills land alongside it with zero collisions or overwrites. Also applied by hand to a real already-scaffolded project and confirmed the fix resolves the original symptom.
+
 ## v0.1.26 — 2026-07-31
 
 **Added:**

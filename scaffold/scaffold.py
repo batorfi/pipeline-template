@@ -128,6 +128,25 @@ def check_no_conflicting_existing_content(target: Path) -> None:
         )
 
 
+def copy_role_skills_into_claude_skills(clone_dir: Path, target: Path) -> None:
+    # Claude Code's own skill discovery only scans .claude/skills/ — a
+    # non-standard directory name like .claude/skills-pipeline-roles/ (chosen
+    # to avoid colliding with Spec Kit's own .claude/skills/speckit-* names)
+    # is invisible to it. Confirmed by a real user session: only the
+    # speckit-* skills showed up, none of the 11 role skills. Since none of
+    # the role skill names actually collide with any speckit-* name, it's
+    # safe to additionally place a copy of each role skill directly under
+    # .claude/skills/ — per-skill copies (not a wholesale directory
+    # replacement) so pre-existing speckit-* entries there are left alone.
+    # .claude/skills-pipeline-roles/ remains the canonical, versioned copy
+    # this function reads from.
+    claude_skills = target / ".claude" / "skills"
+    for entry in sorted((clone_dir / "skills").iterdir()):
+        if not entry.is_dir():
+            continue  # skip stray files like review-notes.md
+        copy_tree_atomic(entry, claude_skills / entry.name)
+
+
 def do_copy_steps(clone_dir: Path, target: Path) -> None:
     copy_tree_atomic(clone_dir / "skills", target / ".claude" / "skills-pipeline-roles")
     copy_tree_atomic(clone_dir / "dashboard", target / "dashboard")
@@ -308,6 +327,13 @@ def scaffold(template_version: str, target: str) -> int:
             spec_kit_version = get_spec_kit_version()
             constitution_path = do_render_steps(clone_dir, target_path, template_version, spec_kit_version)
             specify_ran = run_specify_init(target_path)
+            # Deliberately after specify init, not before: `specify init`
+            # may or may not touch a pre-existing .claude/skills/ directory,
+            # and that hasn't been confirmed either way — running this after
+            # means whatever specify init does to .claude/skills/ is already
+            # done before role-skill copies land on top, rather than risking
+            # them being wiped by an init step that comes after.
+            copy_role_skills_into_claude_skills(clone_dir, target_path)
         except ScaffoldError as e:
             print(f"ERROR: {e}", file=sys.stderr)
             return 1
@@ -443,6 +469,7 @@ def sync(template_version: str, target: str) -> int:
 
         # Wholesale overwrite: skills, dashboard, docs (SCAF-010)
         copy_tree_atomic(clone_dir / "skills", target_path / ".claude" / "skills-pipeline-roles")
+        copy_role_skills_into_claude_skills(clone_dir, target_path)
 
         # dashboard/config.json isn't part of the template's own dashboard/
         # tree (it's generated per project, by write_dashboard_config below)
