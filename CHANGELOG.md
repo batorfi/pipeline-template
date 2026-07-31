@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.31 — 2026-07-31
+
+**Fixed:**
+- **Real process gap, found investigating why the Task Board showed almost everything "pending"** — the dashboard was correct, not buggy: `tasks.md`'s checkboxes are its only source of truth for done/pending, and a real dry-run feature confirmed via `factory-log.md`'s own `worker_task` entries that most tasks had genuinely been completed (batches like `T001-T010a`, `T011-T016`, `T017-T022` all logged done), yet only 3 of 36 checkboxes were ever actually flipped to `[x]` in `tasks.md`. Root cause: nothing in the director skill's own instructions ever told it (or anyone) to check off `tasks.md` as work completed — a worker pane's scope is deliberately limited to its own declared file path, so it never touches the shared `tasks.md` coordination artifact, and the director never picked up that responsibility either.
+- `skills/director/SKILL.md`'s step 6 (Fan-out and implementation) now explicitly requires the director to mark a task's checkbox `[x]` in `tasks.md` as soon as its diff passes scoped tests and is merged — stated as the director's own responsibility, not something a worker pane should do, and explicitly including every task in a batch/range a single worker pane completed, not just the range's final task.
+
 ## v0.1.30 — 2026-07-31
 
 **Fixed:**

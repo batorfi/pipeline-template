@@ -89,7 +89,7 @@ Partition `tasks.md`: `[P]`-tagged tasks with disjoint file paths are eligible f
 
 **On failure**, escalate one tier (Haiku → Sonnet → Opus), carrying the failed diff and error forward as context for the retry. Cap escalation at one hop per tier — a task that fails at Opus doesn't get retried again automatically; it needs human attention at the next checkpoint gate. Log every attempt, escalation, and outcome to `factory-log.md`.
 
-Every worker-produced diff must pass its scoped tests before you consider its task complete.
+Every worker-produced diff must pass its scoped tests before you consider its task complete. As soon as a task's diff passes its scoped tests and is merged into your worktree, mark that task's checkbox `[x]` in `tasks.md` yourself — do not leave this for later or assume it happens automatically. `tasks.md` is a shared coordination artifact you own; a worker pane never edits it directly (a worker's own scope is its declared file path only), so if you don't check off a task, nothing else will. This matters beyond bookkeeping: the dashboard's Task Board reads `tasks.md`'s checkboxes as its only source of truth for what's done — a real dry run found 31 of 36 tasks still shown as "pending" on a feature that had already reached the PR gate, entirely because this step was skipped throughout. Batch-completing several tasks at once (e.g. one worker pane handling a contiguous range) still means checking off every task in that range, not just the range's final one.
 
 **Checkpoint gate**, once per user-story phase. Once every task in a phase is verified — diffs merged into your worktree, tests passing — present the result. Wait.
 - Approve, not final phase → open the next phase's tasks.
