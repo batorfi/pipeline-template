@@ -2,6 +2,14 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.26 — 2026-07-31
+
+**Added:**
+- `scaffold/setup-cmux-workspaces.sh` — a standalone, executable script packaging the exact confirmed-working sequence from `docs/manual-cmux-workspace-setup.md`: renames the current workspace to `<project>-main`, creates and renames `<project>-design` and `<project>-implementation`, writes `.specify/cmux-workspaces.json`, and prints the result for verification. Refuses to run again if the mapping file already exists, unless `--force`. Requested directly: after several rounds of copy-pasting individual commands from the doc and hitting real bugs each time (unquoted placeholders, missing `--title`, missing `--workspace`), a single script to just run was the more reliable path.
+- Copied into every scaffolded project as `docs/setup-cmux-workspaces.sh` (`do_copy_steps` and `--sync`), executable bit preserved.
+- `docs/manual-cmux-workspace-setup.md` restructured to lead with "run the script," demoting the step-by-step commands to a "do it by hand" fallback section — same content, now secondary. README, `docs/scaffolding-guide.md` step 4, and the printed post-scaffold checklist in `scaffold.py` all point at the script first.
+- `docs/` file count in the "definition of ready" checklist updated: 10 onboarding docs plus `setup-cmux-workspaces.sh` (11 top-level items, `docs/prompts/` counted separately).
+
 ## v0.1.25 — 2026-07-31
 
 **Fixed:**

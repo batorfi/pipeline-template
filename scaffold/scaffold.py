@@ -144,6 +144,17 @@ def do_copy_steps(clone_dir: Path, target: Path) -> None:
     # it after scaffold.sh exits.
     copy_tree_atomic(clone_dir / "scaffold" / "prompts", target / "docs" / "prompts")
 
+    # Same reasoning as the prompts above: setup-cmux-workspaces.sh lives in
+    # this template repo's own scaffold/, not in the scaffolded project, so
+    # it has to be copied in explicitly. Placed next to
+    # docs/manual-cmux-workspace-setup.md (the doc it mechanizes) rather than
+    # in docs/prompts/, since it's a real script, not a paste-into-Claude
+    # prompt. Copied with its executable bit preserved.
+    setup_script_src = clone_dir / "scaffold" / "setup-cmux-workspaces.sh"
+    setup_script_dst = target / "docs" / "setup-cmux-workspaces.sh"
+    shutil.copy2(setup_script_src, setup_script_dst)
+    setup_script_dst.chmod(setup_script_dst.stat().st_mode | 0o111)
+
     # dashboard/server/readers/_factory_log_validator.py loads
     # factory-log/validator.py by a fixed path relative to the project root
     # at runtime (parents[3] from its own file) — without copying validator.py
@@ -323,9 +334,10 @@ never from its parent directory:
 
   1. Fill in every <<FILL:...>> marker in .specify/memory/constitution.md
      {'(none remain)' if ready else '(see the list above — scaffold is NOT ready until these are resolved)'}
-  2. Stand up the 3 core cmux workspaces (main, design, implementation) — see
-     docs/manual-cmux-workspace-setup.md (run the cmux commands yourself;
-     includes a naming convention so the cmux sidebar reads clearly).
+  2. Stand up the 3 core cmux workspaces (main, design, implementation) — run
+     docs/setup-cmux-workspaces.sh from this project's root, in the cmux
+     workspace you want as main. See docs/manual-cmux-workspace-setup.md for
+     details or to do it by hand instead.
   3. Start the dashboard backend and confirm the frontend renders — see
      docs/prompts/run-dashboard-in-pane.md and docs/running-the-dashboard.md.
   4. Run one deliberately trivial synthetic feature through all 9 gates by
@@ -449,6 +461,10 @@ def sync(template_version: str, target: str) -> int:
 
         copy_tree_atomic(clone_dir / "docs", target_path / "docs")
         copy_tree_atomic(clone_dir / "scaffold" / "prompts", target_path / "docs" / "prompts")
+
+        sync_setup_script_dst = target_path / "docs" / "setup-cmux-workspaces.sh"
+        shutil.copy2(clone_dir / "scaffold" / "setup-cmux-workspaces.sh", sync_setup_script_dst)
+        sync_setup_script_dst.chmod(sync_setup_script_dst.stat().st_mode | 0o111)
 
         factory_log_dir = target_path / "factory-log"
         factory_log_dir.mkdir(parents=True, exist_ok=True)

@@ -1,8 +1,22 @@
-# Manual cmux workspace setup
+# cmux workspace setup
 
-The commands for standing up this project's 3 core cmux workspaces (main, design, implementation), run yourself directly in your terminal. Produces `.specify/cmux-workspaces.json`.
+How to stand up this project's 3 core cmux workspaces (main, design, implementation) yourself, directly from your terminal — via a script, or by hand if you'd rather. Produces `.specify/cmux-workspaces.json`. (This doc's filename stayed `manual-cmux-workspace-setup.md` even after the script was added, to avoid breaking existing links to it.)
 
 Requires the `cmux` CLI on `PATH` (`cmux --version` to check) and `jq` for parsing its `--json` output.
+
+## Run the script (recommended)
+
+`docs/setup-cmux-workspaces.sh` — copied into your project at scaffold time — does everything below in one shot: renames your current workspace to `<project>-main`, creates and renames `<project>-design` and `<project>-implementation`, writes `.specify/cmux-workspaces.json`, and prints the result for you to verify.
+
+From your project root, in the cmux workspace you want to become **main**:
+
+```bash
+docs/setup-cmux-workspaces.sh
+```
+
+It refuses to run again if `.specify/cmux-workspaces.json` already exists (pass `--force` if you genuinely want a fresh set of workspaces — the old design/implementation ones are left open, not closed, so close them yourself in cmux if you don't want them lingering).
+
+The rest of this doc explains what that script actually does, step by step, and gives the same commands individually — read on if you'd rather run them by hand, the script fails, or you want to understand what it's doing before trusting it.
 
 ## Why a name→ID mapping file at all
 
@@ -10,11 +24,11 @@ cmux's CLI addresses workspaces by opaque ID (`workspace:<n>`), not by name. Eve
 
 ## Naming convention
 
-`.specify/cmux-workspaces.json` is what makes these roles addressable to the pipeline's skills — but nothing stops the *cmux sidebar itself* from also showing you, at a glance, which workspace is which, so you're not relying on memory or tab order while you work. Give each workspace a real display name via `cmux workspace rename`, using your project's own directory name as a prefix so it's unambiguous if you ever have more than one of these pipelines running side by side — e.g. for `my-project`: `my-project-main`, `my-project-design`, `my-project-implementation`. This is optional — the pipeline itself only ever reads IDs from the JSON file below, never a display name — but recommended, since it's the difference between a sidebar full of identical-looking "Untitled" entries and one that reads clearly at a glance.
+`.specify/cmux-workspaces.json` is what makes these roles addressable to the pipeline's skills — but nothing stops the *cmux sidebar itself* from also showing you, at a glance, which workspace is which, so you're not relying on memory or tab order while you work. Give each workspace a real display name via `cmux workspace rename`, using your project's own directory name as a prefix so it's unambiguous if you ever have more than one of these pipelines running side by side — e.g. for `my-project`: `my-project-main`, `my-project-design`, `my-project-implementation`. This is optional — the pipeline itself only ever reads IDs from the JSON file below, never a display name — but recommended, since it's the difference between a sidebar full of identical-looking "Untitled" entries and one that reads clearly at a glance. The script above applies this convention automatically.
 
-## Steps
+## Steps by hand
 
-Run these from inside your project root, in the cmux workspace you want to become **main** — this is where the director and dashboard will live.
+Run these from inside your project root, in the cmux workspace you want to become **main** — this is where the director and dashboard will live. (This is exactly what `docs/setup-cmux-workspaces.sh` runs — use it directly instead of copy-pasting this, unless you have a reason not to.)
 
 ```bash
 PROJECT=$(basename "$PWD")
