@@ -2,6 +2,11 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.25 — 2026-07-31
+
+**Fixed:**
+- **Second real bug found immediately after v0.1.24 shipped**: `cmux workspace rename --title <name>` (no `--workspace`) does not default to the current workspace as assumed — it fails with `Error: workspace rename: could not resolve workspace handle`. There is no "rename the current workspace" shorthand; `--workspace <id>` is required every time, even for the workspace you're sitting in. `docs/manual-cmux-workspace-setup.md`'s step 1 now resolves the current workspace's own ID via `cmux current-workspace --json | jq -r '.workspace_ref'` first, then passes it explicitly to `workspace rename`.
+
 ## v0.1.24 — 2026-07-31
 
 **Fixed:**

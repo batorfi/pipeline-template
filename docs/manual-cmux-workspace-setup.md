@@ -19,12 +19,13 @@ Run these from inside your project root, in the cmux workspace you want to becom
 ```bash
 PROJECT=$(basename "$PWD")
 
-# 1. Rename the current workspace to "<project>-main" and capture its ID.
-#    `cmux workspace rename`, with no --workspace flag, targets the
-#    workspace you're currently in, and prints its ID directly
-#    (`OK workspace:<n>`) — confirmed against a real cmux instance, no
-#    separate lookup needed.
-MAIN_ID=$(cmux workspace rename --title "${PROJECT}-main" | grep -oE 'workspace:[0-9]+')
+# 1. Resolve the current workspace's ID, then rename it to "<project>-main".
+#    `cmux workspace rename` does NOT default to the current workspace when
+#    --workspace is omitted -- it fails with "could not resolve workspace
+#    handle" (confirmed against a real cmux instance). --workspace is
+#    required every time, including for the workspace you're sitting in.
+MAIN_ID=$(cmux current-workspace --json | jq -r '.workspace_ref')
+cmux workspace rename --workspace "$MAIN_ID" --title "${PROJECT}-main"
 echo "main: $MAIN_ID"
 
 # 2. Create and rename "design". `cmux workspace create` also prints the
@@ -77,9 +78,9 @@ The steps above use `cmux workspace rename` / `cmux workspace create` / `cmux wo
 
 Earlier drafts of this doc carried several unconfirmed assumptions, written from the CLI reference alone. A real run resolved them:
 
-- `cmux workspace create` and `cmux workspace rename` **do** print the new/target workspace's ID directly in their own output (`OK workspace:<n>`) — no before/after diff against `workspace list` is needed, contrary to what an earlier draft assumed as the fallback path.
+- `cmux workspace create` prints the new workspace's ID directly in its own output (`OK workspace:<n>`) — no before/after diff against `workspace list` is needed, contrary to what an earlier draft assumed as the fallback path.
 - The JSON key for a workspace's ID is `ref` (e.g. `"ref": "workspace:17"`) inside each entry of `workspace list --json`'s `workspaces` array; `current-workspace --json` wraps the same value one level up as `workspace_ref`.
-- `cmux workspace rename --workspace <id> --title <name>` works as documented, targeting a workspace other than the current one without switching into it. **Also caught by a real run:** `cmux workspace rename` requires `--title <name>` — a bare positional name (`cmux workspace rename "some-name"`, no `--title`) fails with `Error: workspace rename requires --title <new>`. The steps above already use `--title`; don't drop it if typing this by hand.
+- `cmux workspace rename` requires **both** `--workspace <id>` and `--title <name>` — every time, with no default. Two real failures surfaced this: a bare positional name (no `--title`) fails with `Error: workspace rename requires --title <new>`, and omitting `--workspace` — even when renaming the workspace you're currently sitting in — fails with `Error: workspace rename: could not resolve workspace handle`. There is no "rename the current workspace" shorthand; step 1 above resolves the current workspace's own ID via `current-workspace --json` first, specifically to work around this.
 
 Still unconfirmed: whether a multi-word name needs different quoting than shown above (the real run used single-word, hyphenated names throughout, so this wasn't exercised) — report back if you hit a quoting issue.
 
