@@ -21,6 +21,25 @@ class DashboardConfig:
     constitution_path: Path
     cmux_socket_path: str | None
 
+    def resolve_tasks_path(self) -> Path | None:
+        """The configured tasks_path is a static value set once at scaffold
+        time (dashboard/config.json), but Spec Kit creates each feature's
+        tasks.md under a numbered per-feature directory
+        (specs/<NNN-feature-slug>/tasks.md) that doesn't exist yet at
+        scaffold time and changes with every new feature — a static path can
+        never stay correct. If the configured path exists, honor it (a human
+        may have pointed it somewhere deliberately); otherwise fall back to
+        the most recently modified specs/*/tasks.md, a reasonable proxy for
+        "the feature currently being worked."
+        """
+        if self.tasks_path is not None and self.tasks_path.exists():
+            return self.tasks_path
+
+        candidates = list((self.project_root / "specs").glob("*/tasks.md"))
+        if not candidates:
+            return None
+        return max(candidates, key=lambda p: p.stat().st_mtime)
+
     @classmethod
     def load(cls, config_json_path: str | Path, project_root: str | Path | None = None) -> "DashboardConfig":
         # Resolve to an absolute path BEFORE computing .parent.parent — pathlib's

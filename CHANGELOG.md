@@ -2,6 +2,15 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.28 — 2026-07-31
+
+**Fixed:**
+- **Real bug, found during the first actual dry-run feature**: the dashboard's Task Board stayed permanently empty even with a real, active feature and a real `tasks.md` on disk. Root cause: `dashboard/config.json`'s `tasks_path` is a static value written once at scaffold time (`specs/tasks.md`), but Spec Kit creates each feature's `tasks.md` under a numbered per-feature directory (`specs/<NNN-feature-slug>/tasks.md`) that doesn't exist yet at scaffold time and changes with every new feature — the static path could never be correct.
+- `DashboardConfig` gained `resolve_tasks_path()`: honors the configured path if it actually exists on disk (a human may have pointed it somewhere deliberately), otherwise falls back to the most recently modified `specs/*/tasks.md` as a proxy for "the feature currently being worked." The `/tasks` route now calls this instead of using the static config value directly.
+- 3 new tests (`test_tasks_path_resolution.py`, dashboard test suite now 16 total) covering: fallback to the most recent `specs/*/tasks.md` when configured path is missing, honoring an explicitly-configured path that does exist, and returning `None` cleanly when nothing exists anywhere. Also verified live against the real scaffolded project that surfaced the bug: `/tasks` went from an empty phase list to the real 32-task breakdown from the actual feature's `tasks.md`.
+
+**Investigated, not a bug:** the same dry run also showed an empty "Running Now" (live panes) zone — confirmed this is correct behavior, not a defect: the dry run used simulated in-process subagents rather than real `cmux`-spawned panes (chosen because `cmux` wasn't reachable from the director's shell at the time — see the separate `~/.local/bin/cmux` symlink fix, a machine-local issue outside this repo). No real panes existed, so the dashboard correctly showed none.
+
 ## v0.1.27 — 2026-07-31
 
 **Fixed:**

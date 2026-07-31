@@ -12,4 +12,4 @@ router = APIRouter()
 @router.get("/tasks")
 def get_tasks(request: Request):
     config = request.app.state.config
-    return read_tasks(config.tasks_path)
+    return read_tasks(config.resolve_tasks_path())
