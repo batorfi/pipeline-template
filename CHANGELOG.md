@@ -2,6 +2,11 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.23 — 2026-07-31
+
+**Fixed:**
+- `docs/manual-cmux-workspace-setup.md`'s commands switched from the legacy `cmux rename-workspace` / `cmux new-workspace` / `cmux list-workspaces` form to the current noun-verb form (`cmux workspace rename` / `cmux workspace create` / `cmux workspace list`) — the legacy form is still supported indefinitely, but a real run showed it prints a one-time per-session deprecation-style notice on first use of each command, which the current form avoids entirely. Requested directly after seeing the notice while following the doc for real.
+
 ## v0.1.22 — 2026-07-31
 
 **Fixed:**
