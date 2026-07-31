@@ -2,6 +2,13 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.33 — 2026-07-31
+
+**Changed:**
+- The TOTALS panel (previously "Totals," dollar spend by tier + an Opus-share budget bar) still showed `$0.00` after v0.1.32's per-pane fix — it's a separate zone, sourced from `/stats`'s historical `factory-log.md` figures, which are still all `0.0` (that gap was explicitly called out as unaddressed in v0.1.32, and the user asked for token tracking instead of cost tracking generally). Replaced entirely: now titled "Live Token Usage," aggregates real token counts across currently-open panes (reusing the same `/panes` data `live-panes.js` already renders per-card), with an explicit note that it's a live snapshot of open panes only, not a full-feature historical total — closed panes' token usage isn't retained anywhere once their pane closes.
+- `app.js` no longer fetches `/stats` for this panel (dropped the now-unused call entirely, rather than fetching data nothing renders).
+- Verified live against the real scaffolded project: Live Token Usage now shows a real ~607k-token aggregate across 6 active panes, matching the sum of `/panes`' own per-pane real token data.
+
 ## v0.1.32 — 2026-07-31
 
 **Added:**

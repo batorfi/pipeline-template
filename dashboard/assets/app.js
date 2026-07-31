@@ -28,11 +28,10 @@ async function tick() {
 
     const selected = getSelectedFeature();
 
-    const [scopedLog, panesResult, tasksResult, statsResult] = await Promise.all([
+    const [scopedLog, panesResult, tasksResult] = await Promise.all([
       selected ? api.log({ feature: selected }) : Promise.resolve(allLog),
       api.panes(),
       api.tasks(),
-      selected ? api.stats({ feature: selected }) : api.stats(),
     ]);
 
     renderAttentionBand({
@@ -51,7 +50,7 @@ async function tick() {
       logEntries: scopedLog.entries,
     });
 
-    renderTotalsPanel(statsResult);
+    renderTotalsPanel(panesResult.panes);
   } catch (err) {
     // A failed poll cycle should not crash the page — surface it quietly and
     // try again next tick, per "calm by default" even under backend errors.

@@ -1,57 +1,55 @@
 // Zone 4b: totals panel — implements FE-030.
-// Cumulative spend by tier, and the budget_trend early-warning flag,
-// visually distinct from the routine figures around it.
+// Real per-pane token usage, aggregated across currently-open panes.
+// Cost tracking (dollar spend) was never real: factory-log.md's usage
+// blocks are always logged as a 0.0 placeholder, since cmux exposes no
+// cost/pricing data of any kind. Token counts ARE real, read from each
+// open pane's own local Claude Code session transcript (see /panes,
+// token_usage_reader.py) — but only for panes currently open; a pane
+// that's already closed leaves no trace here, so this is a live snapshot,
+// not a full-feature historical total.
 
 const el = document.getElementById("totals-panel");
 
-export function renderTotalsPanel(stats) {
-  if (!stats || stats.total_cost === undefined) {
-    el.innerHTML = `<div class="empty-state">No cost data yet.</div>`;
+export function renderTotalsPanel(panes) {
+  const withTokens = (panes || []).filter((p) => p.tokens && p.tokens.available);
+
+  if (withTokens.length === 0) {
+    el.innerHTML = `<div class="empty-state">No live token data yet — no Claude Code panes currently open.</div>`;
     return;
   }
 
-  const tierFigures = Object.entries(stats.cost_by_tier || {})
-    .map(
-      ([tier, amount]) => `
-        <div class="totals-panel__figure-block">
-          <span class="tier-badge tier-badge--${tier}">${tier}</span>
-          <div class="totals-panel__figure">$${amount.toFixed(2)}</div>
-          <div class="totals-panel__label">${(stats.cost_by_tier_pct[tier] ?? 0).toFixed(1)}% of total</div>
-        </div>
-      `
-    )
-    .join("");
-
-  const budgetTrend = stats.budget_trend
-    ? renderBudgetTrend(stats.budget_trend)
-    : "";
+  const totals = withTokens.reduce(
+    (acc, p) => ({
+      total: acc.total + p.tokens.total_tokens,
+      input: acc.input + p.tokens.input_tokens,
+      output: acc.output + p.tokens.output_tokens,
+    }),
+    { total: 0, input: 0, output: 0 }
+  );
 
   el.innerHTML = `
-    <h2 class="section-heading">Totals</h2>
+    <h2 class="section-heading">Live Token Usage</h2>
     <div class="totals-panel__grid">
       <div class="totals-panel__figure-block">
-        <div class="totals-panel__figure">$${stats.total_cost.toFixed(2)}</div>
-        <div class="totals-panel__label">Total spend</div>
+        <div class="totals-panel__figure">${formatTokenCount(totals.total)}</div>
+        <div class="totals-panel__label">Total tokens · ${withTokens.length} active pane${withTokens.length === 1 ? "" : "s"}</div>
       </div>
-      ${tierFigures}
+      <div class="totals-panel__figure-block">
+        <div class="totals-panel__figure">${formatTokenCount(totals.input)}</div>
+        <div class="totals-panel__label">Input tokens</div>
+      </div>
+      <div class="totals-panel__figure-block">
+        <div class="totals-panel__figure">${formatTokenCount(totals.output)}</div>
+        <div class="totals-panel__label">Output tokens</div>
+      </div>
     </div>
-    ${budgetTrend}
+    <p class="totals-panel__note">Live snapshot of currently-open panes only — not a full-feature historical total. Closed panes aren't tracked yet.</p>
   `;
 }
 
-function renderBudgetTrend(trend) {
-  const overClass = trend.over_ceiling ? "totals-panel__bar-fill--over" : "";
-  const badgeClass = trend.over_ceiling ? "status-badge--attention" : "status-badge--healthy";
-  const widthPct = Math.min(100, trend.opus_share_pct);
-  return `
-    <div class="totals-panel__budget-trend">
-      <div class="card__header">
-        <span class="card__title">Opus share of spend</span>
-        <span class="status-badge ${badgeClass}">${trend.opus_share_pct.toFixed(1)}% / ${trend.ceiling_pct}% ceiling</span>
-      </div>
-      <div class="totals-panel__bar-track">
-        <div class="totals-panel__bar-fill ${overClass}" style="width: ${widthPct}%"></div>
-      </div>
-    </div>
-  `;
+function formatTokenCount(n) {
+  if (typeof n !== "number") return "0";
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
 }
