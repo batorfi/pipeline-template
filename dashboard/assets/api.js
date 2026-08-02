@@ -12,7 +12,7 @@ async function getJSON(path) {
 
 export const api = {
   log: (params = {}) => getJSON(`/log${toQuery(params)}`),
-  tasks: () => getJSON("/tasks"),
+  tasks: (params = {}) => getJSON(`/tasks${toQuery(params)}`),
   panes: () => getJSON("/panes"),
   config: () => getJSON("/config"),
   stats: (params = {}) => getJSON(`/stats${toQuery(params)}`),

@@ -10,6 +10,6 @@ router = APIRouter()
 
 
 @router.get("/tasks")
-def get_tasks(request: Request):
+def get_tasks(request: Request, feature: str | None = None):
     config = request.app.state.config
-    return read_tasks(config.resolve_tasks_path())
+    return read_tasks(config.resolve_tasks_path(feature=feature))

@@ -2,6 +2,13 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.38 — 2026-08-02
+
+**Fixed:**
+- **Real bug, found switching features in a real multi-feature project**: the Task Board kept showing a previous feature's tasks after switching to a new one in the dashboard's feature switcher. Root cause: `/tasks` never accepted a `feature` parameter at all — `resolve_tasks_path()` always picked the most recently modified `specs/*/tasks.md` on disk, with no way to know which feature was actually selected in the UI. Switching features never changed what `/tasks` returned.
+- `resolve_tasks_path()` now accepts an optional `feature` argument: when given, it's authoritative — `specs/<feature>/tasks.md` if it exists, `None` otherwise (never silently falls back to a different feature's tasks, which would just be the same bug in a new disguise). With no feature given, behavior is unchanged (configured path, else most-recently-modified fallback — the original single-feature-project convenience). `/tasks` now accepts `?feature=<slug>`, and `app.js` passes the feature switcher's current selection through, mirroring how `/log` and `/stats` already work.
+- 2 new tests (suite now 28 total). Verified live against a real two-feature project: `?feature=001-...` and `?feature=002-...` now correctly return each feature's own distinct task list (34/34 checked vs. 46 tasks/16 checked) instead of both returning whichever was most recently touched.
+
 ## v0.1.37 — 2026-08-02
 
 **Fixed:**

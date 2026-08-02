@@ -30,7 +30,10 @@ async function tick() {
     const [scopedLog, panesResult, tasksResult] = await Promise.all([
       selected ? api.log({ feature: selected }) : Promise.resolve(allLog),
       api.panes(),
-      api.tasks(),
+      // Scoped to the selected feature when one is chosen -- previously
+      // /tasks had no idea which feature was selected at all, so switching
+      // features in the UI never changed which tasks.md it returned.
+      selected ? api.tasks({ feature: selected }) : api.tasks(),
     ]);
 
     renderAttentionBand({

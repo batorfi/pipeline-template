@@ -22,17 +22,31 @@ class DashboardConfig:
     cmux_socket_path: str | None
     cmux_workspace_ids: dict[str, str] | None
 
-    def resolve_tasks_path(self) -> Path | None:
+    def resolve_tasks_path(self, feature: str | None = None) -> Path | None:
         """The configured tasks_path is a static value set once at scaffold
         time (dashboard/config.json), but Spec Kit creates each feature's
         tasks.md under a numbered per-feature directory
         (specs/<NNN-feature-slug>/tasks.md) that doesn't exist yet at
         scaffold time and changes with every new feature — a static path can
-        never stay correct. If the configured path exists, honor it (a human
-        may have pointed it somewhere deliberately); otherwise fall back to
-        the most recently modified specs/*/tasks.md, a reasonable proxy for
-        "the feature currently being worked."
+        never stay correct.
+
+        If `feature` is given (the dashboard's feature switcher has an
+        explicit selection), that selection is authoritative:
+        specs/<feature>/tasks.md if it exists, else None — never silently
+        fall back to a different feature's tasks, which is exactly the bug
+        this parameter fixes: /tasks previously had no way to know which
+        feature was selected at all, so switching features in the UI never
+        changed what it returned.
+
+        With no feature given, preserves the original behavior: the
+        configured path if it exists (a human may have pointed it somewhere
+        deliberately), otherwise the most recently modified specs/*/tasks.md
+        as a single-feature-project convenience fallback.
         """
+        if feature:
+            scoped = self.project_root / "specs" / feature / "tasks.md"
+            return scoped if scoped.exists() else None
+
         if self.tasks_path is not None and self.tasks_path.exists():
             return self.tasks_path
 

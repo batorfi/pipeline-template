@@ -52,3 +52,41 @@ def test_honors_configured_path_when_it_actually_exists(tmp_path):
 def test_returns_none_when_nothing_exists_anywhere(tmp_path):
     config = _config(tmp_path, "specs/tasks.md")
     assert config.resolve_tasks_path() is None
+
+
+def test_feature_param_scopes_to_that_feature_even_when_it_is_not_the_newest(tmp_path):
+    """Real bug: switching features in the dashboard's feature switcher never
+    changed what /tasks returned, because resolve_tasks_path had no way to
+    know which feature was selected -- it always used the most-recently-
+    modified specs/*/tasks.md regardless. An explicit feature must win over
+    the mtime heuristic, even for an older feature."""
+    older = tmp_path / "specs" / "001-first-feature" / "tasks.md"
+    older.parent.mkdir(parents=True)
+    older.write_text("# older, but this is the one selected\n", encoding="utf-8")
+
+    newer = tmp_path / "specs" / "002-second-feature" / "tasks.md"
+    newer.parent.mkdir(parents=True)
+    newer.write_text("# newer, not selected\n", encoding="utf-8")
+    import os
+
+    os.utime(newer, (older.stat().st_mtime + 10, older.stat().st_mtime + 10))
+
+    config = _config(tmp_path, "specs/tasks.md")
+
+    assert config.resolve_tasks_path(feature="001-first-feature") == older
+    assert config.resolve_tasks_path(feature="002-second-feature") == newer
+    # No feature given -> unchanged mtime-fallback behavior.
+    assert config.resolve_tasks_path() == newer
+
+
+def test_feature_param_with_no_matching_tasks_md_returns_none_not_another_feature(tmp_path):
+    """An explicit, wrong/unfinished feature selection must not silently
+    fall back to showing a different feature's tasks -- that would be
+    exactly the original bug in a new disguise."""
+    other = tmp_path / "specs" / "001-some-feature" / "tasks.md"
+    other.parent.mkdir(parents=True)
+    other.write_text("# some other feature's tasks\n", encoding="utf-8")
+
+    config = _config(tmp_path, "specs/tasks.md")
+
+    assert config.resolve_tasks_path(feature="002-not-started-yet") is None
