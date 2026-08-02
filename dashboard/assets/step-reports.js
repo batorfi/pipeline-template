@@ -47,16 +47,18 @@ function renderGroup(group) {
 
 function renderCard(entry) {
   const tierBadge = entry.tier ? `<span class="tier-badge tier-badge--${entry.tier}">${entry.tier}</span>` : "";
-  const usage = entry.usage
-    ? `<span class="data-mono">$${(entry.usage.estimated_cost_usd ?? 0).toFixed(2)}</span>`
-    : "";
+  // Cost figures removed: factory-log.md's usage.estimated_cost_usd is
+  // always logged as a 0.0 placeholder (cmux exposes no pricing data of any
+  // kind) — showing it read as "this cost nothing," which isn't true, it's
+  // just not measured. See dashboard/assets/totals-panel.js for real token
+  // counts instead, which read from actual Claude Code session transcripts.
   const decision = entry.decision ? `<span class="status-badge status-badge--healthy">${entry.decision}</span>` : "";
 
   return `
     <div class="card">
       <div class="card__header">
         <span class="card__title">${escapeHtml(entry.stage)}</span>
-        <span>${tierBadge} ${usage} ${decision}</span>
+        <span>${tierBadge} ${decision}</span>
       </div>
       <div class="card__body">
         <span class="data-mono">${escapeHtml(entry.feature || "")}</span>

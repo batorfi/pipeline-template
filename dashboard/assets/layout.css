@@ -76,7 +76,6 @@
   font-weight: 600;
 }
 
-.live-panes__list,
 .step-reports__list,
 .task-board__list {
   display: flex;
@@ -113,13 +112,6 @@
 .card__body {
   font-size: 0.9rem;
   color: var(--color-text-muted);
-}
-
-.card__tokens {
-  margin-top: var(--space-1);
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  opacity: 0.8;
 }
 
 .card__summary {

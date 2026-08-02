@@ -2,6 +2,12 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.35 — 2026-08-02
+
+**Removed:**
+- The "Running Now" (live panes) dashboard zone, by request. `dashboard/assets/live-panes.js` deleted, `index.html`'s zone-2 section removed, `app.js` no longer imports or calls it. The underlying `/panes` fetch and data are still used (Live Token Usage's aggregate, and the attention band's "is anything running" check both depend on it) — only the dedicated per-pane display zone is gone.
+- Cost figures (`$0.00`) from the step-report feed cards — `factory-log.md`'s `usage.estimated_cost_usd` is always a `0.0` placeholder (cmux exposes no pricing data of any kind, see v0.1.32/v0.1.33), and showing it read as "this cost nothing," not "this isn't measured." `step-reports.js` no longer renders it; real token counts remain visible in Live Token Usage.
+
 ## v0.1.34 — 2026-07-31
 
 **Added:**

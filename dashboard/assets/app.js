@@ -4,7 +4,6 @@
 
 import { api } from "./api.js";
 import { renderAttentionBand } from "./attention-band.js";
-import { renderLivePanes } from "./live-panes.js";
 import { renderStepReports } from "./step-reports.js";
 import { renderTaskBoard } from "./task-board.js";
 import { renderTotalsPanel } from "./totals-panel.js";
@@ -39,8 +38,6 @@ async function tick() {
       panesAvailable: panesResult.panes_unavailable === false,
       panes: panesResult.panes,
     });
-
-    renderLivePanes({ panes: panesResult.panes, panesAvailable: panesResult.panes_unavailable === false });
 
     renderStepReports(scopedLog.entries);
 

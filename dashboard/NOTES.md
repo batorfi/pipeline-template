@@ -1,6 +1,6 @@
 # Dashboard frontend — Phase 2 notes
 
-Vanilla HTML/CSS/JS, no build step, ES modules. 10 files: `index.html`, `assets/theme.css`, `assets/layout.css`, and 8 JS modules (`api.js`, `gates.js`, `attention-band.js`, `live-panes.js`, `step-reports.js`, `task-board.js`, `totals-panel.js`, `feature-switcher.js`, `app.js`).
+Vanilla HTML/CSS/JS, no build step, ES modules. 9 files: `index.html`, `assets/theme.css`, `assets/layout.css`, and 7 JS modules (`api.js`, `gates.js`, `attention-band.js`, `step-reports.js`, `task-board.js`, `totals-panel.js`, `feature-switcher.js`, `app.js`). `live-panes.js` (the "Running Now" zone) was removed by request — see CHANGELOG.
 
 ## What's actually verified
 
