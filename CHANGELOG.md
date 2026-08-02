@@ -2,6 +2,11 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.36 — 2026-08-02
+
+**Changed:**
+- Step-report decision badges now show the past-tense outcome ("approved," "revised," "rejected," "restarted") instead of the raw imperative move name `factory-log.md` logs ("approve," "revise," "reject," "restart") — the badge always describes a decision already made, not an instruction still pending. Scoped to every gate type, not just checkpoint gates, for consistency. Also fixed the badge's color to actually reflect the decision (healthy/green for approved, caution/amber for revised, attention/red for rejected or restarted) — previously every decision type rendered in the same green "healthy" badge regardless of outcome, including reject and restart.
+
 ## v0.1.35 — 2026-08-02
 
 **Removed:**

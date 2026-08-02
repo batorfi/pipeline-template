@@ -45,6 +45,24 @@ function renderGroup(group) {
   `;
 }
 
+// factory-log.md logs the raw imperative move name (approve/revise/
+// reject/restart, per docs/human-gates.md) — displayed here as the past
+// tense of what actually happened, since this badge always describes a
+// decision already made, not an instruction still pending.
+const DECISION_LABELS = {
+  approve: "approved",
+  revise: "revised",
+  reject: "rejected",
+  restart: "restarted",
+};
+
+const DECISION_BADGE_CLASSES = {
+  approve: "status-badge--healthy",
+  revise: "status-badge--caution",
+  reject: "status-badge--attention",
+  restart: "status-badge--attention",
+};
+
 function renderCard(entry) {
   const tierBadge = entry.tier ? `<span class="tier-badge tier-badge--${entry.tier}">${entry.tier}</span>` : "";
   // Cost figures removed: factory-log.md's usage.estimated_cost_usd is
@@ -52,7 +70,9 @@ function renderCard(entry) {
   // kind) — showing it read as "this cost nothing," which isn't true, it's
   // just not measured. See dashboard/assets/totals-panel.js for real token
   // counts instead, which read from actual Claude Code session transcripts.
-  const decision = entry.decision ? `<span class="status-badge status-badge--healthy">${entry.decision}</span>` : "";
+  const decisionLabel = DECISION_LABELS[entry.decision] || entry.decision;
+  const decisionClass = DECISION_BADGE_CLASSES[entry.decision] || "status-badge--healthy";
+  const decision = entry.decision ? `<span class="status-badge ${decisionClass}">${escapeHtml(decisionLabel)}</span>` : "";
 
   return `
     <div class="card">
