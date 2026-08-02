@@ -5,6 +5,15 @@
 
 const listEl = document.getElementById("step-reports-list");
 
+// The poll loop re-renders this zone every tick by replacing innerHTML
+// wholesale, which would otherwise silently collapse any <details> the user
+// had open — the DOM node is destroyed and rebuilt from scratch each time,
+// with no memory of its own open/closed state. Track which loop-groups are
+// open across re-renders here, keyed by feature+stage (stable across ticks
+// since groups form from consecutive same feature+stage entries), and
+// re-apply it on every render.
+const openGroupKeys = new Set();
+
 export function renderStepReports(logEntries) {
   const entries = logEntries || [];
   if (entries.length === 0) {
@@ -14,6 +23,17 @@ export function renderStepReports(logEntries) {
 
   const groups = groupConsecutiveByStage(entries);
   listEl.innerHTML = groups.map(renderGroup).join("");
+
+  for (const details of listEl.querySelectorAll("details.step-reports__loop-group")) {
+    details.addEventListener("toggle", () => {
+      const key = details.dataset.groupKey;
+      if (details.open) {
+        openGroupKeys.add(key);
+      } else {
+        openGroupKeys.delete(key);
+      }
+    });
+  }
 }
 
 function groupConsecutiveByStage(entries) {
@@ -36,8 +56,10 @@ function renderGroup(group) {
   // Loop-internal group: show the latest as the visible summary, rest
   // collapsed under a <details> the user can expand.
   const [latest, ...rest] = group.entries;
+  const key = `${group.feature}::${group.stage}`;
+  const openAttr = openGroupKeys.has(key) ? " open" : "";
   return `
-    <details class="step-reports__loop-group">
+    <details class="step-reports__loop-group" data-group-key="${escapeHtml(key)}"${openAttr}>
       <summary>${escapeHtml(group.stage)} — ${group.entries.length} attempts (latest shown, click to expand all)</summary>
       ${renderCard(latest)}
       ${rest.map(renderCard).join("")}

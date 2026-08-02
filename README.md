@@ -44,19 +44,19 @@ If you skip this step, `scaffold.sh` will warn and continue without it — you c
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.36 --target ./my-project
+  | bash -s -- --template-version v0.1.37 --target ./my-project
 ```
 
 *Existing project* — point `--target` at your existing repository's root instead:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/batorfi/pipeline-template/main/install.sh \
-  | bash -s -- --template-version v0.1.36 --target ./my-existing-repo
+  | bash -s -- --template-version v0.1.37 --target ./my-existing-repo
 ```
 
 Your existing files, git history, and `.git/` are left untouched — the scaffold only adds `.claude/skills-pipeline-roles/`, `.specify/`, `dashboard/`, `docs/`, and `specs/`. **If your project already has non-empty `dashboard/` or `docs/` directories, the scaffold refuses to run** rather than silently deleting and replacing them (this pipeline's own artifacts use those same directory names) — move your existing one aside first, or scaffold into a subdirectory instead of the project root.
 
-If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.36 --target <path>`.)
+If `specify` from step 1 is on `PATH`, either form runs `specify init . --integration claude` inside the target automatically. (Or, from an existing local clone of this repo: `scaffold/scaffold.sh --template-version v0.1.37 --target <path>`.)
 
 **3. Follow the printed checklist** — fill in `constitution.md`'s `<<FILL:...>>` markers, stand up the 3 cmux workspaces, start the dashboard in a side pane of main, and run one deliberately trivial synthetic feature through all 9 gates by hand before trusting it with anything real. For that last step — actually starting the director and responding at a gate — see [`docs/working-with-the-director.md`](docs/working-with-the-director.md).
 
@@ -77,7 +77,7 @@ The cmux-workspace step: run `docs/setup-cmux-workspaces.sh` from your project r
 | See the whole empty-repo-to-ongoing-delivery story in one read | [`docs/lifecycle-walkthrough.md`](docs/lifecycle-walkthrough.md) |
 | Get the dashboard running (in a cmux pane or standalone) and troubleshoot it | [`docs/running-the-dashboard.md`](docs/running-the-dashboard.md), [`scaffold/prompts/run-dashboard-in-pane.md`](scaffold/prompts/run-dashboard-in-pane.md) (copied to `docs/prompts/` in your scaffolded project) |
 
-## Status: v0.1.36
+## Status: v0.1.37
 
 - ✅ `factory-log/` — schema, validator, fixtures, templates (26 passing tests)
 - ✅ `constitution/` — template, structural validator, fixtures

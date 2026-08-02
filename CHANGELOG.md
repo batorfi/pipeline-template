@@ -2,6 +2,11 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.37 — 2026-08-02
+
+**Fixed:**
+- Expanding a step-report loop-group `<details>` accordion (e.g. "3 attempts, click to expand all") would silently re-collapse on its own after a few seconds. Root cause: the poll loop re-renders the whole step-reports zone every 4 seconds by replacing `innerHTML` wholesale, which destroys and rebuilds the `<details>` DOM node from scratch each tick with no memory of its own open/closed state. `step-reports.js` now tracks which groups are open across re-renders (keyed by feature+stage, stable across ticks) and re-applies the `open` attribute on every render, with a `toggle` listener keeping the tracked set in sync as the user opens/closes groups by hand.
+
 ## v0.1.36 — 2026-08-02
 
 **Changed:**
