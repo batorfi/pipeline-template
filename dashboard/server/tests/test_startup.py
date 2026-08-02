@@ -32,6 +32,20 @@ def test_near_empty_state_all_endpoints_succeed(near_empty_config_file):
     assert client.get("/panes").status_code == 200
 
 
+def test_responses_are_never_cached(near_empty_config_file):
+    """Real bug: a fix could be verified correct via curl while a browser
+    kept showing old behavior from a cached static app.js/api.js. Every
+    response -- API and (when a StaticFiles mount is present) static assets
+    alike -- must carry Cache-Control: no-store, since this dashboard's
+    whole point is reflecting the project's current state accurately."""
+    app = create_app(config_path=str(near_empty_config_file))
+    client = TestClient(app)
+
+    for path in ("/log", "/tasks", "/stats", "/config", "/panes"):
+        response = client.get(path)
+        assert response.headers.get("cache-control") == "no-store", path
+
+
 def test_bare_relative_config_filename_resolves_correctly(dashboard_config_file, pipeline_root):
     """Regression test: PIPELINE_CONFIG=config.json (a bare filename, no
     directory component) must resolve project_root correctly. Path("config.json")

@@ -33,6 +33,20 @@ def create_app(config_path: str | None = None) -> FastAPI:
         )
     app.state.config = DashboardConfig.load(resolved_config_path)
 
+    @app.middleware("http")
+    async def no_cache_headers(request, call_next):
+        # This dashboard's whole point is reflecting the project's current
+        # state accurately — a stale cached copy of app.js/api.js served
+        # from a browser's disk cache after a fix ships is worse than no
+        # caching at all for a local dev tool like this. Confirmed as a
+        # real source of confusion: a fix could be verified correct via
+        # curl while the browser kept showing old behavior from a cached
+        # static asset. Applies to both static files and API responses,
+        # both of which should always be fresh here.
+        response = await call_next(request)
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
     app.include_router(log_route.router)
     app.include_router(tasks_route.router)
     app.include_router(panes_route.router)

@@ -2,6 +2,13 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.39 — 2026-08-02
+
+**Fixed:**
+- **Real source of confusion across several earlier fixes in this changelog**: the dashboard's static assets (`app.js`, `api.js`, etc.) had no cache-control headers at all, so browsers could — and did — keep serving a stale cached copy of the frontend after a real backend fix had already shipped and was verified correct via `curl`. Reported after the v0.1.38 `/tasks` feature-scoping fix: the backend was confirmed correct, but the dashboard kept showing the previous feature's tasks until a hard refresh.
+- `create_app()` now adds a global `Cache-Control: no-store` middleware to every response — API and static assets alike. This dashboard's whole point is reflecting the project's current state accurately; for a local dev tool iterated on this frequently, no caching at all is the correct default, not a performance concern.
+- 1 new regression test (`test_responses_are_never_cached`; suite now 29 total) asserting every endpoint carries the header. Confirmed live: hard-refreshing after this fix, feature-switching now reflects the correct tasks immediately, matching what `curl` already showed.
+
 ## v0.1.38 — 2026-08-02
 
 **Fixed:**
