@@ -2,6 +2,14 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.40 — 2026-08-02
+
+**Fixed:**
+- **Real, already-shipped bug**: a scaffolded project got no `.gitignore` at all, from either a fresh scaffold or `--sync`. Confirmed already committed in a real scaffolded project three features in: `.specify/cmux-workspaces.json` (opaque cmux workspace IDs meaningful only to *your* local cmux socket — actively wrong on anyone else's machine) and `dashboard/config.json` (generated, local). Surfaced while designing multi-collaborator support, but this is a bug in the current single-owner design too — nothing about it depends on multiple engineers.
+- New `scaffold/gitignore-additions.txt` + `ensure_gitignore()`: creates `.gitignore` on a fresh scaffold, or appends only the actually-missing lines to an existing one on `--sync` — never overwrites a project's own rules, never duplicates lines already present. Also ignores Python's `__pycache__/`/`*.pyc`/`.pytest_cache/`, previously not addressed either. Idempotent — safe on every scaffold/sync.
+- 3 new tests (`test_ensure_gitignore.py`; suite now 32 total): fresh-file creation, append-only-missing-lines against an existing `.gitignore`, and idempotency across repeated calls.
+- Remediated by hand on a real already-scaffolded project: `git rm --cached` on both files (working-tree copies preserved, not deleted — each engineer keeps their own local one), `.gitignore` generated, left staged for the project owner to commit rather than committing on their behalf.
+
 ## v0.1.39 — 2026-08-02
 
 **Fixed:**
