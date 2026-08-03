@@ -43,7 +43,7 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 ## What happens, step by step
 
 1. **Git init** the target repository.
-2. **Skills copied** into `.claude/skills/` — the 11 role skills, pulled and pinned, never hand-authored per project.
+2. **Skills copied** into `.claude/skills/` — the 12 role skills, pulled and pinned, never hand-authored per project.
 3. **`specify init . --integration claude`** — installs Spec Kit's own 6 skills and creates `.specify/memory/`, `.specify/scripts/`, `.specify/templates/`.
 4. **Stand up the 3 core cmux workspaces** — main, design, implementation. (Review/docs/PR workspaces can be created lazily on first use.) Run `docs/setup-cmux-workspaces.sh` from your project root, in the workspace you want as main — it names each workspace `<project>-main`/`-design`/`-implementation` so the cmux sidebar reads clearly at a glance, and writes `.specify/cmux-workspaces.json`, the name→ID mapping the director skill actually reads to address these workspaces by `--workspace <id>` (cmux itself has no workspace-naming concept beyond `workspace rename`). See `docs/manual-cmux-workspace-setup.md` for what the script does step by step, or to run the same commands by hand.
 5. **Author `constitution.md`** from the rendered template — every `<<FILL:...>>` marker is a value only you can set: the triage rubric's module-boundary definition, both concurrency caps (per-feature and project-wide), both budget figures, the Opus-share ceiling percentage, and any project-specific sensitive surfaces. `scaffold.sh` refuses to consider scaffolding complete while any marker remains.
@@ -54,13 +54,13 @@ This check does not currently look for narrower conflicts (e.g., a single file y
 
 ## Definition of "ready for the first real feature"
 
-- [ ] All 11 role skills present under `.claude/skills-pipeline-roles/`, loading without error.
+- [ ] All 12 role skills present under `.claude/skills-pipeline-roles/`, loading without error.
 - [ ] Spec Kit's own skills present under `.claude/skills/` (confirmed against a real `specify init`: 10 skills — `speckit-constitution`, `speckit-specify`, `speckit-clarify`, `speckit-plan`, `speckit-tasks`, `speckit-analyze`, `speckit-checklist`, `speckit-implement`, `speckit-converge`, `speckit-taskstoissues` — the exact set may change with the Spec Kit version you install; this repository doesn't control or vendor it).
 - [ ] `constitution.md` structurally complete — no `<<FILL:...>>` markers remain.
 - [ ] `factory-log.md` exists, structured-entry format from entry zero, documenting the constitution's own creation.
 - [ ] The three core cmux workspaces exist and are reachable, and `.specify/cmux-workspaces.json` correctly maps `main`/`design`/`implementation` to their real IDs.
 - [ ] The dashboard's backend is running and smoke-tested; the frontend renders correctly against the near-empty state.
-- [ ] `docs/` present with all 10 onboarding docs plus `setup-cmux-workspaces.sh` (11 top-level items, not counting `docs/prompts/`).
+- [ ] `docs/` present with all 11 onboarding docs plus `setup-cmux-workspaces.sh` (12 top-level items, not counting `docs/prompts/`).
 - [ ] One synthetic dry-run feature has completed all 9 gates, every gate approved explicitly by a human.
 - [ ] Concurrency caps and budget figures have been revisited at least once using the dry run's own data.
 

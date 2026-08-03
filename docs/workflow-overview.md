@@ -20,8 +20,9 @@ The human-facing counterpart to the pipeline concept itself — condensed from `
 | Code reviewer | Review | **Opus** |
 | Techwriter | Docs | Sonnet |
 | PR writer | PR | Sonnet |
+| Docs synthesizer | Docs | **Opus** |
 
-Bolded roles are the pipeline's actual line of defense — everywhere else, a human gate immediately downstream is the primary check.
+Bolded roles are the pipeline's actual line of defense — everywhere else, a human gate immediately downstream is the primary check. Docs synthesizer is the one exception to "a role runs inside the pipeline": it's invoked directly by you, any time, not spawned by the director as part of any feature's sequence — see `docs/working-with-docs-synthesizer.md`.
 
 ## The nine gates
 

@@ -2,6 +2,18 @@
 
 Bundled versioning — one tag names one consistent state of skills, dashboard, log schema, and constitution template together. See `docs/scaffolding-guide.md` for what a version pin actually covers.
 
+## v0.1.41 — 2026-08-03
+
+**Added:**
+- **New role skill: `docs-synthesizer`**, the 12th role skill. Requested directly: `techwriter` is deliberately scoped to one feature's diff (spawned by the director after verification, inputs limited to that feature's spec/plan/ADRs/diff) and can't produce broad, cross-feature documentation — a technical overview, a how-to guide, a whitepaper, or similar. `docs-synthesizer` fills that gap as a genuinely separate role: invoked directly by you, any time, never spawned by the director, reading across every feature's history (all specs/plans/ADRs, all of `factory-log.md`, the current codebase) rather than one diff.
+- **Eight distinct output types**, each with its own audience/structure/grounding rules, developed and refined through direct back-and-forth before being written into the skill: technical overview, how-to guide, whitepaper, atomic concept note (Zettelkasten-style, `docs/concepts/<timestamp>-<slug>.md`, with both single-note and survey/candidate creation modes), ADR index/map-of-content (`docs/concepts/_index.md`, incremental not regenerated), FAQ (`docs/faq.md`, sourced from real clarify-stage Q&A, incremental), glossary (`docs/glossary.md`), and an onboarding runbook (`docs/onboarding.md`, composed of links to how-to guides rather than duplicating them).
+- Every output type shares the same non-fabrication discipline as `techwriter`: every claim traces to a real ADR/spec/log entry/code, gaps stated explicitly rather than invented.
+- **Opus tier** (by explicit request) — added to `constitution/constitution.template.md`'s model-tier table and `docs/workflow-overview.md`'s role table.
+- New `docs/working-with-docs-synthesizer.md`, mirroring `docs/working-with-the-director.md`'s clarity about mechanics — how to invoke it, how it differs from `techwriter`, what each output type produces and where it lives.
+- Role-skill and onboarding-doc counts updated everywhere referenced (11→12 role skills, 10→11 onboarding docs) in `README.md`, `docs/scaffolding-guide.md`, `docs/lifecycle-walkthrough.md`, `docs/getting-started.md`. Historical status-bullet and code-comment references describing *specific past confirmed test results* (e.g. "installed alongside our 11 role skills" describing a real v0.1.18-era test) were deliberately left unchanged — they describe what was true then, not a current count.
+- Verified end-to-end from a fresh clone: the new skill directory is picked up by the existing generic copy logic (`do_copy_steps` copies every subdirectory under `skills/`; `copy_role_skills_into_claude_skills` does the same into `.claude/skills/`) with zero code changes required — confirmed both locations contain `docs-synthesizer` after a fresh scaffold run.
+- **Not yet run against a real project's full history end-to-end** — labeled honestly as such in the new doc and the README status bullet. Each of the eight modes needs a real first use to confirm its expectations hold up in practice.
+
 ## v0.1.40 — 2026-08-02
 
 **Fixed:**

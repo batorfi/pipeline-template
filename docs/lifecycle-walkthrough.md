@@ -4,7 +4,7 @@ Condensed from `concepts/claude-only-pipeline/20260720-115709_lifecycle-walkthro
 
 ## Phase 0 — preconditions, once, before touching the repo
 
-Claude Code authenticated, cmux installed and reachable, `specify` CLI installed, and the 11 role skills available in this template repository, pinned to a version.
+Claude Code authenticated, cmux installed and reachable, `specify` CLI installed, and the 12 role skills available in this template repository, pinned to a version.
 
 ## Phase 1 — scaffold this specific repository
 

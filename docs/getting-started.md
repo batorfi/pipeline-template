@@ -11,6 +11,7 @@ This is the Claude-only spec-driven multi-agent development pipeline: one persis
 - **Filling in `constitution.md`'s placeholders?** → `docs/constitution-authoring-guide.md`
 - **Want the whole story, empty repo to ongoing feature delivery, in one read?** → `docs/lifecycle-walkthrough.md`
 - **Trying to get the dashboard running?** → `docs/running-the-dashboard.md`
+- **Want a technical overview, how-to guide, whitepaper, or other broad documentation written from the project's whole history?** → `docs/working-with-docs-synthesizer.md`
 
 ## The one-paragraph version
 

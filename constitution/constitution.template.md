@@ -46,6 +46,7 @@ if this project's risk profile genuinely differs from the pipeline default:
 | Code reviewer | Opus |
 | Techwriter | Sonnet |
 | PR writer | Sonnet |
+| Docs synthesizer | Opus |
 
 **Escalation cascade.** A task that fails its scoped tests escalates exactly one tier
 (Haiku → Sonnet → Opus), carrying the failed diff and error forward as context. One
